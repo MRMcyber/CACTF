@@ -1,13 +1,7 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "views/**",
-        "public/**",
-        "images/**",
-        "db/ctf.db",
-        "node_modules/sql.js/dist/**"
-      ]
+      "includeFiles": "{views/**,public/**,images/**,db/ctf.db,node_modules/sql.js/dist/**}"
     }
   },
   "rewrites": [
