@@ -1,0 +1,78 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+</div>
+
+<% if (typeof sqli_flag !== 'undefined' && sqli_flag) { %>
+  <div class="flag-banner">
+    <h2>🚨 Flag Captured</h2>
+    <p>Authentication bypass successful!</p>
+    <div class="flag-code"><%= sqli_flag %></div>
+    <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+  </div>
+<% } %>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-wallet"></i> Account Balance</div>
+    <div class="metric-value">$<%= (profile && profile.balance != null) ? (typeof profile.balance === 'number' ? profile.balance.toFixed(2) : parseFloat(profile.balance).toFixed(2)) : '0.00' %></div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-circle-check"></i> Account Status</div>
+    <div class="metric-value" style="color: var(--success);">Active</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-calendar"></i> Member Since</div>
+    <div class="metric-value" style="font-size: 1.25rem;">
+      <%= (profile && profile.created_at) ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A' %>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2><i class="fa-solid fa-user"></i> Account Details</h2>
+  </div>
+
+  <div class="info-row">
+    <div class="info-label">Username</div>
+    <div class="info-value"><strong><%= profile ? profile.username : '' %></strong></div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-label">Email</div>
+    <div class="info-value"><%= profile ? profile.email : '' %></div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-label">Full Name</div>
+    <div class="info-value"><%= (profile && profile.full_name) ? profile.full_name : 'Not provided' %></div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-label">Phone</div>
+    <div class="info-value"><%= (profile && profile.phone) ? profile.phone : 'Not provided' %></div>
+  </div>
+
+  <% if (profile && profile.bio) { %>
+    <div class="info-row">
+      <div class="info-label">Bio</div>
+      <div class="info-value"><%= profile.bio %></div>
+    </div>
+  <% } %>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2><i class="fa-solid fa-pen-to-square"></i> Update Bio</h2>
+  </div>
+
+  <form action="/profile/update" method="POST">
+    <div class="form-group">
+      <label for="bio">Bio</label>
+      <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."><%= (profile && profile.bio) ? profile.bio : '' %></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+  </form>
+</div>

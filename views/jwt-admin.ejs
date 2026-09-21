@@ -1,0 +1,45 @@
+<div class="soc-shell">
+  <div class="page-header">
+    <h1 style="color: white; margin-bottom: 1.5rem;">Security Operations Center</h1>
+  </div>
+
+  <div class="soc-grid">
+    <div class="soc-widget">
+      <div class="w-value">1,247</div>
+      <div class="w-label">Active Sessions</div>
+    </div>
+
+    <div class="soc-widget">
+      <div class="w-value">3,891</div>
+      <div class="w-label">Threats Blocked</div>
+    </div>
+
+    <div class="soc-widget">
+      <div class="w-value">99.97%</div>
+      <div class="w-label">Uptime</div>
+    </div>
+
+    <div class="soc-widget">
+      <div class="w-value">12</div>
+      <div class="w-label">Alerts</div>
+    </div>
+  </div>
+
+  <div class="card" style="background: #1e293b; border-color: #334155; color: white;">
+    <div class="card-header" style="border-bottom: 1px solid #334155; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+      <h2 style="color: white;"><i class="fa-solid fa-shield-halved"></i> Authenticated Claims</h2>
+    </div>
+    <div class="token-display">
+      <%= typeof claims !== 'undefined' ? JSON.stringify(claims, null, 2) : '{}' %>
+    </div>
+  </div>
+
+  <% if (typeof flag !== 'undefined' && flag) { %>
+    <div class="flag-banner">
+      <h2>🚨 Flag Captured</h2>
+      <p>JWT token successfully forged!</p>
+      <div class="flag-code"><%= flag %></div>
+      <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+    </div>
+  <% } %>
+</div>

@@ -1,0 +1,60 @@
+<div class="page-header">
+  <h1>Customers</h1>
+  <p>Search and manage your customer database</p>
+</div>
+
+<% if (typeof xss_flag !== 'undefined' && xss_flag) { %>
+  <div class="flag-banner">
+    <h2>🚨 Flag Captured</h2>
+    <p>Reflected XSS detected!</p>
+    <div class="flag-code"><%= xss_flag %></div>
+    <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+  </div>
+<% } %>
+
+<div class="card">
+  <form action="/search" method="GET">
+    <div style="display: flex; gap: 0.75rem;">
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <input 
+          type="text" 
+          name="q" 
+          value="<%= typeof query !== 'undefined' ? query : '' %>" 
+          placeholder="Search by name, email, or username..."
+        >
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+    </div>
+  </form>
+</div>
+
+<% if (typeof query !== 'undefined' && query) { %>
+  <div class="card">
+    <p style="margin-bottom: 1.25rem;">Showing results for: <strong><%- query %></strong></p>
+
+    <% if (typeof results !== 'undefined' && results && results.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% results.forEach(function(item) { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.full_name || 'N/A' %></td>
+              <td><strong><%= item.username %></strong></td>
+              <td><%= item.email %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p style="color: var(--text-secondary); margin: 0;">No results found.</p>
+    <% } %>
+  </div>
+<% } %>

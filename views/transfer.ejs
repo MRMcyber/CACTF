@@ -1,0 +1,39 @@
+<div class="page-header">
+  <h1>Billing &amp; Invoicing</h1>
+  <p>Manage payments and transfers</p>
+</div>
+
+<% if (typeof flag !== 'undefined' && flag) { %>
+  <div class="flag-banner">
+    <h2>🚨 Flag Captured</h2>
+    <p>Unauthorized transfer exploit successful!</p>
+    <div class="flag-code"><%= flag %></div>
+    <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+  </div>
+<% } %>
+
+<div class="metrics-grid">
+  <div class="metric-card" style="max-width: 320px;">
+    <div class="metric-label"><i class="fa-solid fa-wallet"></i> Current Balance</div>
+    <div class="metric-value">$<%= typeof balance !== 'undefined' ? parseFloat(balance).toFixed(2) : '0.00' %></div>
+  </div>
+</div>
+
+<div class="card" style="max-width: 520px;">
+  <div class="card-header">
+    <h2><i class="fa-solid fa-paper-plane"></i> Send Payment</h2>
+  </div>
+  <form action="/transfer" method="POST">
+    <div class="form-group">
+      <label for="recipient">Recipient Username</label>
+      <input type="text" id="recipient" name="recipient" placeholder="Enter recipient username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Amount ($)</label>
+      <input type="number" id="amount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Send Payment</button>
+  </form>
+</div>

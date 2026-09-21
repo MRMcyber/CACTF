@@ -1,0 +1,26 @@
+{
+  "name": "ctf-vulnerable-app",
+  "version": "1.0.0",
+  "description": "Intentionally Vulnerable CTF Web Application for Security Training",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db/init.js"
+  },
+  "keywords": [
+    "ctf",
+    "security",
+    "training"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
+    "sql.js": "^1.11.0"
+  }
+}

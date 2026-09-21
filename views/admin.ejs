@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h1>Admin Panel</h1>
+  <p>System administration and user management</p>
+</div>
+
+<% if (typeof flag !== 'undefined' && flag) { %>
+  <div class="flag-banner">
+    <h2>🚨 Flag Captured</h2>
+    <p>Admin panel accessed!</p>
+    <div class="flag-code"><%= flag %></div>
+    <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+  </div>
+<% } %>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-users"></i> Total Users</div>
+    <div class="metric-value"><%= typeof users !== 'undefined' && users ? users.length : 0 %></div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-server"></i> System Status</div>
+    <div class="metric-value" style="color: var(--success); font-size: 1.5rem;">Operational</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label"><i class="fa-solid fa-code-branch"></i> Platform Version</div>
+    <div class="metric-value" style="font-size: 1.5rem;">3.2.1</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2><i class="fa-solid fa-user-shield"></i> User Management</h2>
+    <a href="/admin/reports" class="btn btn-ghost btn-sm">View User Reports &rarr;</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (typeof users !== 'undefined' && users && users.length > 0) { %>
+        <% users.forEach(function(u) { %>
+          <tr>
+            <td><%= u.id %></td>
+            <td><strong><%= u.username %></strong></td>
+            <td><%= u.email %></td>
+            <td>
+              <span class="badge <%= u.role === 'admin' ? 'badge-admin' : 'badge-user' %>">
+                <%= u.role || 'user' %>
+              </span>
+            </td>
+            <td>$<%= typeof u.balance === 'number' ? u.balance.toFixed(2) : parseFloat(u.balance || 0).toFixed(2) %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="5" style="text-align: center; color: var(--text-muted);">No users found.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
