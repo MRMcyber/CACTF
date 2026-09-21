@@ -321,13 +321,11 @@ img { max-width: 100%; display: block; }
 .footer-bottom div { display: flex; gap: 2rem; }
 .footer-wordmark {
   color: rgba(255,255,255,.27);
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(7rem, 22vw, 19rem);
+  font-size: clamp(5rem, 16vw, 13rem);
   font-weight: 800;
-  letter-spacing: -.1em;
-  line-height: .68;
-  margin-left: -.08em;
-  text-align: center;
+  letter-spacing: -.08em;
+  line-height: .72;
+  margin-left: -.04em;
   white-space: nowrap;
 }
 
