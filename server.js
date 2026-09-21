@@ -168,4 +168,8 @@ async function start() {
   });
 }
 
-start().catch(console.error);
+if (require.main === module) {
+  start().catch(console.error);
+}
+
+module.exports = app;
