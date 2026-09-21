@@ -1,3 +1,4 @@
 node_modules/
-db/ctf.db
 npm-debug.log*
+.neon
+.env.local
