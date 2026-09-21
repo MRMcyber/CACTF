@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "@faker-js/faker": "^9.0.0",
+    "@vercel/analytics": "^2.0.1",
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
