@@ -84,6 +84,7 @@ img { max-width: 100%; display: block; }
 .nav-links { display: flex; align-items: center; gap: 2rem; }
 .nav-links a { color: var(--text-secondary); font-weight: 500; font-size: .9rem; }
 .nav-links a:hover { color: var(--text); }
+.nav-toggle { display: none; }
 
 .public-content { padding-top: 64px; }
 .public-content > * { font-family: 'Space Grotesk', sans-serif; }
@@ -798,14 +799,43 @@ tr:last-child td { border-bottom: none; }
 }
 
 @media (max-width: 768px) {
-  .public-nav { height: auto; min-height: 64px; }
-  .public-nav .nav-inner { align-items: flex-start; flex-wrap: wrap; gap: .75rem; padding: .85rem 1rem; }
+  .public-nav { height: 64px; }
+  .public-nav .nav-inner { padding: .85rem 1rem; position: relative; }
   .nav-brand { font-size: 1.05rem; }
   .nav-brand img { height: 28px; width: 28px; }
-  .nav-links { flex: 1 0 100%; gap: .5rem; justify-content: flex-end; }
-  .nav-links a { font-size: .78rem; }
-  .nav-links .btn { padding: .5rem .7rem; }
-  .public-content { padding-top: 108px; }
+  .nav-toggle {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+    width: 36px;
+  }
+  .nav-toggle span { background: var(--text); display: block; height: 2px; transition: transform .2s, opacity .2s; width: 21px; }
+  .nav-links {
+    background: rgba(255,255,255,.98);
+    border-top: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    display: none;
+    gap: .25rem;
+    left: 0;
+    padding: .75rem 1rem 1rem;
+    position: absolute;
+    right: 0;
+    top: 64px;
+  }
+  .public-nav.menu-open .nav-links { display: flex; flex-direction: column; align-items: stretch; }
+  .nav-links a { font-size: .9rem; padding: .7rem .75rem; }
+  .nav-links .btn { text-align: center; }
+  .public-nav.menu-open .nav-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .public-nav.menu-open .nav-toggle span:nth-child(2) { opacity: 0; }
+  .public-nav.menu-open .nav-toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .public-content { padding-top: 64px; }
   .hero { min-height: calc(100svh - 108px); padding: 4rem 1.25rem 2rem; }
   .hero-inner { width: 100%; }
   .hero h1 { font-size: clamp(3.5rem, 17vw, 6rem); }
