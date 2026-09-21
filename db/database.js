@@ -13,7 +13,9 @@ let SQL = null;
 
 async function initSQL() {
   if (!SQL) {
-    SQL = await initSqlJs();
+    SQL = await initSqlJs({
+      locateFile: () => path.join(__dirname, '..', 'public', 'sql-wasm.wasm')
+    });
   }
   return SQL;
 }
