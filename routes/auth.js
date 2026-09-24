@@ -62,6 +62,17 @@ router.post('/register', (req, res) => {
   const db = getDb();
 
   try {
+    // Check if username already exists
+    const checkStmt = db.prepare('SELECT id FROM users WHERE username = ?');
+    checkStmt.bind([username]);
+    const exists = checkStmt.step();
+    checkStmt.free();
+
+    if (exists) {
+      db.close();
+      return res.render('register', { title: 'Register', user: null, message: null, error: 'Username already taken. Please choose a different username.' });
+    }
+
     const stmt = db.prepare('INSERT INTO users (username, password, email, full_name, phone, ssn, balance, role, bio, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     stmt.run([username, password, email || '', full_name || '', phone || '', 'N/A', 1000.00, 'user', bio || '', new Date().toISOString()]);
     stmt.free();
