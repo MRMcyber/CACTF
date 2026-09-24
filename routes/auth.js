@@ -32,7 +32,8 @@ router.post('/login', async (req, res) => {
         req.session.sqli_flag = 'flag{194827}';
       }
 
-      return res.redirect('/profile');
+      // Save session before redirect (required for serverless platforms)
+      return req.session.save(() => res.redirect(302, '/profile'));
     } else {
       res.render('login', { title: 'Login', user: null, message: null, error: 'Invalid credentials' });
     }
