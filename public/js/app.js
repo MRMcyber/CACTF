@@ -19,6 +19,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  var expandingButtons = document.querySelectorAll('.scroll-expand');
+  if (expandingButtons.length && 'IntersectionObserver' in window) {
+    var buttonObserver = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.7 });
+
+    expandingButtons.forEach(function(button) { buttonObserver.observe(button); });
+  }
+
   // Auto-dismiss alerts
   document.querySelectorAll('.alert').forEach(function(el) {
     setTimeout(function() {
