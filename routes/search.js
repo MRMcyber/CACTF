@@ -1,39 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { getDb } = require('../db/database');
-
-// Helper to convert sql.js results to array of objects
-function allResults(db, query, params) {
-  const stmt = db.prepare(query);
-  if (params) stmt.bind(params);
-  const results = [];
-  while (stmt.step()) {
-    const cols = stmt.getColumnNames();
-    const vals = stmt.get();
-    const row = {};
-    cols.forEach((col, i) => { row[col] = vals[i]; });
-    results.push(row);
-  }
-  stmt.free();
-  return results;
-}
+const { query } = require('../db/database');
 
 // GET /search - VULNERABLE TO REFLECTED XSS
-router.get('/', (req, res) => {
-  const query = req.query.q || '';
+router.get('/', async (req, res) => {
+  const q = req.query.q || '';
   let xss_flag = null;
-  if (query.includes('<script>') || query.includes('onerror=')) {
+  if (q.includes('<script>') || q.includes('onerror=')) {
       xss_flag = 'flag{857391}';
   }
   let results = [];
 
-  if (query) {
-    const db = getDb();
-    results = allResults(db,
-      'SELECT id, username, email, full_name FROM users WHERE username LIKE ? OR full_name LIKE ? OR email LIKE ?',
-      [`%${query}%`, `%${query}%`, `%${query}%`]
+  if (q) {
+    results = await query(
+      'SELECT id, username, email, full_name FROM users WHERE username LIKE $1 OR full_name LIKE $2 OR email LIKE $3',
+      [`%${q}%`, `%${q}%`, `%${q}%`]
     );
-    db.close();
   }
 
   // Return search results
@@ -42,7 +24,7 @@ router.get('/', (req, res) => {
     user: req.session.user,
     message: null,
     error: null,
-    query: query,
+    query: q,
     xss_flag: xss_flag,
     results: results
   });

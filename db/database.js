@@ -1,37 +1,22 @@
 /**
- * Shared database module for sql.js
- * Provides a getDb() function that returns a ready-to-use SQL.js database instance.
- * The database is loaded from disk and saved back after modifications.
+ * Shared database module — Neon Postgres (serverless driver)
+ * Replaces the old sql.js / SQLite file-based approach so the app
+ * works on read-only deployments like Vercel.
  */
-const initSqlJs = require('sql.js');
-const path = require('path');
-const fs = require('fs');
+const { neon } = require('@neondatabase/serverless');
 
-const DB_PATH = path.join(__dirname, 'ctf.db');
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  'postgresql://neondb_owner:npg_aexGUfS8IB3Z@ep-fancy-art-b4fih0j9-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
 
-let SQL = null;
+const sql = neon(DATABASE_URL);
 
-async function initSQL() {
-  if (!SQL) {
-    SQL = await initSqlJs({
-      locateFile: () => path.join(__dirname, '..', 'public', 'sql-wasm.wasm')
-    });
-  }
-  return SQL;
+/**
+ * Run a parameterised query and return rows.
+ * Usage:  const rows = await query('SELECT * FROM users WHERE id = $1', [42]);
+ */
+async function query(text, params = []) {
+  return sql.query(text, params);
 }
 
-function getDb() {
-  if (!SQL) {
-    throw new Error('SQL.js not initialized. Call initSQL() first.');
-  }
-  const fileBuffer = fs.readFileSync(DB_PATH);
-  return new SQL.Database(fileBuffer);
-}
-
-function saveDb(db) {
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(DB_PATH, buffer);
-}
-
-module.exports = { initSQL, getDb, saveDb, DB_PATH };
+module.exports = { query, sql, DATABASE_URL };

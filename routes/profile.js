@@ -1,31 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getDb, saveDb } = require('../db/database');
-
-// Helper to get single row as object
-function getRow(db, query, params) {
-  const stmt = db.prepare(query);
-  if (params) stmt.bind(params);
-  let row = null;
-  if (stmt.step()) {
-    const cols = stmt.getColumnNames();
-    const vals = stmt.get();
-    row = {};
-    cols.forEach((col, i) => { row[col] = vals[i]; });
-  }
-  stmt.free();
-  return row;
-}
+const { query } = require('../db/database');
 
 // GET /profile - Show logged-in user's profile
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
 
-  const db = getDb();
-  const profile = getRow(db, 'SELECT * FROM users WHERE id = ?', [req.session.user.id]);
-  db.close();
+  const rows = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+  const profile = rows.length > 0 ? rows[0] : null;
 
   res.render('profile', {
     title: 'Dashboard',
@@ -38,32 +22,26 @@ router.get('/', (req, res) => {
 });
 
 // POST /profile/update - Update bio (stored XSS entry point)
-router.post('/update', (req, res) => {
+router.post('/update', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
 
   const { bio } = req.body;
-  const db = getDb();
-
-  // Update user bio
-  const stmt = db.prepare('UPDATE users SET bio = ? WHERE id = ?');
-  stmt.run([bio, req.session.user.id]);
-  stmt.free();
-  saveDb(db);
-  db.close();
+  await query('UPDATE users SET bio = $1 WHERE id = $2', [bio, req.session.user.id]);
 
   res.redirect('/profile');
 });
 
 // GET /api/users/:id/profile - User profile API
-router.get('/users/:id/profile', (req, res) => {
-  const db = getDb();
-  const user = getRow(db, 'SELECT id, username, email, full_name, phone, ssn, balance, role, bio FROM users WHERE id = ?', [parseInt(req.params.id)]);
-  db.close();
+router.get('/users/:id/profile', async (req, res) => {
+  const rows = await query(
+    'SELECT id, username, email, full_name, phone, ssn, balance, role, bio FROM users WHERE id = $1',
+    [parseInt(req.params.id)]
+  );
 
-  if (user) {
-    res.json(user);
+  if (rows.length > 0) {
+    res.json(rows[0]);
   } else {
     res.status(404).json({ error: 'User not found' });
   }

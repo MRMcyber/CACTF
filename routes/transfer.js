@@ -1,31 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getDb, saveDb } = require('../db/database');
-
-// Helper to get single row as object
-function getRow(db, query, params) {
-  const stmt = db.prepare(query);
-  if (params) stmt.bind(params);
-  let row = null;
-  if (stmt.step()) {
-    const cols = stmt.getColumnNames();
-    const vals = stmt.get();
-    row = {};
-    cols.forEach((col, i) => { row[col] = vals[i]; });
-  }
-  stmt.free();
-  return row;
-}
+const { query } = require('../db/database');
 
 // GET /transfer - Fund transfer form
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
 
-  const db = getDb();
-  const user = getRow(db, 'SELECT balance FROM users WHERE id = ?', [req.session.user.id]);
-  db.close();
+  const rows = await query('SELECT balance FROM users WHERE id = $1', [req.session.user.id]);
+  const user = rows.length > 0 ? rows[0] : null;
 
   res.render('transfer', {
     title: 'Fund Transfer',
@@ -38,7 +22,7 @@ router.get('/', (req, res) => {
 });
 
 // POST /transfer - Process payment
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -47,9 +31,8 @@ router.post('/', (req, res) => {
   const transferAmount = parseFloat(amount);
 
   if (!recipient || isNaN(transferAmount) || transferAmount <= 0) {
-    const db = getDb();
-    const user = getRow(db, 'SELECT balance FROM users WHERE id = ?', [req.session.user.id]);
-    db.close();
+    const rows = await query('SELECT balance FROM users WHERE id = $1', [req.session.user.id]);
+    const user = rows.length > 0 ? rows[0] : null;
     return res.render('transfer', {
       title: 'Fund Transfer',
       user: req.session.user,
@@ -60,13 +43,13 @@ router.post('/', (req, res) => {
     });
   }
 
-  const db = getDb();
+  const senderRows = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+  const sender = senderRows.length > 0 ? senderRows[0] : null;
 
-  const sender = getRow(db, 'SELECT * FROM users WHERE id = ?', [req.session.user.id]);
-  const recv = getRow(db, 'SELECT * FROM users WHERE username = ?', [recipient]);
+  const recvRows = await query('SELECT * FROM users WHERE username = $1', [recipient]);
+  const recv = recvRows.length > 0 ? recvRows[0] : null;
 
   if (!recv) {
-    db.close();
     return res.render('transfer', {
       title: 'Fund Transfer',
       user: req.session.user,
@@ -78,7 +61,6 @@ router.post('/', (req, res) => {
   }
 
   if (sender.balance < transferAmount) {
-    db.close();
     return res.render('transfer', {
       title: 'Fund Transfer',
       user: req.session.user,
@@ -90,19 +72,14 @@ router.post('/', (req, res) => {
   }
 
   // Perform transfer
-  let stmt = db.prepare('UPDATE users SET balance = balance - ? WHERE id = ?');
-  stmt.run([transferAmount, sender.id]);
-  stmt.free();
+  await query('UPDATE users SET balance = balance - $1 WHERE id = $2', [transferAmount, sender.id]);
+  await query('UPDATE users SET balance = balance + $1 WHERE id = $2', [transferAmount, recv.id]);
 
-  stmt = db.prepare('UPDATE users SET balance = balance + ? WHERE id = ?');
-  stmt.run([transferAmount, recv.id]);
-  stmt.free();
+  const updatedSenderRows = await query('SELECT balance FROM users WHERE id = $1', [sender.id]);
+  const updatedRecvRows = await query('SELECT balance FROM users WHERE id = $1', [recv.id]);
 
-  const updatedSender = getRow(db, 'SELECT balance FROM users WHERE id = ?', [sender.id]);
-  const updatedRecv = getRow(db, 'SELECT balance FROM users WHERE id = ?', [recv.id]);
-
-  saveDb(db);
-  db.close();
+  const updatedSender = updatedSenderRows[0];
+  const updatedRecv = updatedRecvRows[0];
 
   // Flag condition: if recipient's balance exceeds 5000 after transfer
   let flag = null;

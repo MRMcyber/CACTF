@@ -1,25 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { getDb } = require('../db/database');
+const { query } = require('../db/database');
 
 // JWT signing secret
 const JWT_SECRET = 'secret';
-
-// Helper to get single row as object
-function getRow(db, query, params) {
-  const stmt = db.prepare(query);
-  if (params) stmt.bind(params);
-  let row = null;
-  if (stmt.step()) {
-    const cols = stmt.getColumnNames();
-    const vals = stmt.get();
-    row = {};
-    cols.forEach((col, i) => { row[col] = vals[i]; });
-  }
-  stmt.free();
-  return row;
-}
 
 // GET /jwt/login
 router.get('/login', (req, res) => {
@@ -33,11 +18,10 @@ router.get('/login', (req, res) => {
 });
 
 // POST /jwt/login - Returns a JWT token
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const db = getDb();
-  const user = getRow(db, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
-  db.close();
+  const rows = await query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+  const user = rows.length > 0 ? rows[0] : null;
 
   if (user) {
     const token = jwt.sign(

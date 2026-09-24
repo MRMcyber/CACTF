@@ -3,7 +3,7 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
-const { initSQL, getDb } = require('./db/database');
+const { query } = require('./db/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,22 +70,6 @@ app.use('/jwt', jwtAdminRoutes);
 app.use('/api', apiRoutes);
 app.use('/api', profileRoutes); // IDOR API route (/api/users/:id/profile)
 
-// ── Helper ──
-function allResults(db, query, params) {
-  const stmt = db.prepare(query);
-  if (params) stmt.bind(params);
-  const results = [];
-  while (stmt.step()) {
-    const cols = stmt.getColumnNames();
-    const vals = stmt.get();
-    const row = {};
-    cols.forEach((col, i) => { row[col] = vals[i]; });
-    results.push(row);
-  }
-  stmt.free();
-  return results;
-}
-
 // ── Challenges list builder ──
 function buildChallenges(foundFlags) {
   return [
@@ -120,13 +104,11 @@ app.get('/submit-flag', (req, res) => {
 });
 
 // ── Flag Submission (POST) ──
-app.post('/submit-flag', (req, res) => {
+app.post('/submit-flag', async (req, res) => {
   if (!req.session.user) return res.redirect('/login');
 
   const { flag } = req.body;
-  const db = getDb();
-  const flags = allResults(db, 'SELECT challenge, flag, points FROM flags');
-  db.close();
+  const flags = await query('SELECT challenge, flag, points FROM flags');
 
   if (!req.session.foundFlags) req.session.foundFlags = [];
 
@@ -161,7 +143,6 @@ app.post('/submit-flag', (req, res) => {
 
 // ── Start ──
 async function start() {
-  await initSQL();
   app.listen(PORT, () => {
     console.log(`\n  CACTF Platform`);
     console.log(`  Running at http://localhost:${PORT}\n`);
