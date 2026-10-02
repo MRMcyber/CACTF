@@ -79,8 +79,8 @@ async function initDatabase() {
     const bio = faker.lorem.sentence();
     const createdAt = faker.date.past({ years: 2 }).toISOString();
 
-    // User 42 gets a special SSN containing the IDOR flag
-    const actualSsn = (i + 1 === 42) ? 'flag{581930}' : ssn;
+    // User at index 4 (DB id=5) gets a special SSN containing the IDOR flag
+    const actualSsn = (i + 1 === 4) ? 'flag{581930}' : ssn;
 
     users.push({
       username, password, email, fullName, phone,
@@ -128,7 +128,7 @@ async function initDatabase() {
   console.log(`✅ ${flags.length} flags inserted`);
   console.log(`✅ User data exported to data/users.json`);
   console.log(`\n🔑 Admin credentials: admin / admin`);
-  console.log(`🎯 IDOR target: User ID 43 (index 42 in users, id=43 in DB because admin is id=1)`);
+  console.log(`🎯 IDOR target: User ID 5`);
 }
 
 initDatabase().catch(console.error);
