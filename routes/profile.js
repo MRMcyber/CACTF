@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-// POST /profile/update - Update bio (stored XSS entry point)
+// POST /profile/update - Update bio
 router.post('/update', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
@@ -30,7 +30,18 @@ router.post('/update', async (req, res) => {
   const { bio } = req.body;
   await query('UPDATE users SET bio = $1 WHERE id = $2', [bio, req.session.user.id]);
 
-  res.redirect('/profile');
+  // Re-fetch and render directly (avoids redirect issues on Vercel)
+  const rows = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+  const profile = rows.length > 0 ? rows[0] : null;
+
+  res.render('profile', {
+    title: 'Dashboard',
+    user: req.session.user,
+    message: 'Bio updated successfully!',
+    error: null,
+    profile: profile,
+    sqli_flag: req.session.sqli_flag || null
+  });
 });
 
 // GET /api/users/:id/profile - User profile API
