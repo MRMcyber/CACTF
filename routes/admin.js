@@ -20,12 +20,18 @@ router.get('/dashboard', async (req, res) => {
 router.get('/reports', async (req, res) => {
   const users = await query('SELECT id, username, full_name, email, bio, created_at FROM users ORDER BY id DESC');
 
+  // Generate a dynamic token for the stored XSS chain
+  const crypto = require('crypto');
+  const reportToken = crypto.randomBytes(16).toString('hex');
+  req.session.report_token = reportToken;
+
   res.render('reports', {
     title: 'User Reports',
     user: req.session.user,
     message: null,
     error: null,
-    users: users
+    users: users,
+    reportToken: reportToken
   });
 });
 

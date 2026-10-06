@@ -21,11 +21,28 @@ router.get('/secret', (req, res) => {
   }
 });
 
-// GET /api/admin/secret-flag - Second-order XSS chain target
-router.get('/admin/secret-flag', (req, res) => {
+// POST /api/admin/system-diagnostics - Second-order XSS chain target
+router.post('/admin/system-diagnostics', (req, res) => {
+  const { token, action } = req.body;
+  
+  if (!token || token !== req.session.report_token) {
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid or missing CSRF token'
+    });
+  }
+
+  if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid request origin'
+    });
+  }
+
   res.json({
+    success: true,
     flag: 'flag{391023}',
-    message: 'You successfully exploited the stored XSS chain!'
+    message: 'System diagnostics completed. Stored XSS chain successful!'
   });
 });
 

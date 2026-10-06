@@ -3,6 +3,21 @@
   <p>Submitted user information and activity</p>
 </div>
 
+<!-- Admin security token required for actions on this page -->
+<meta name="csrf-token" content="<%= typeof reportToken !== 'undefined' ? reportToken : '' %>">
+
+<script>
+  // Admin-only diagnostics script (simulated)
+  // function runDiagnostics() {
+  //   const token = document.querySelector('meta[name="csrf-token"]').content;
+  //   fetch('/api/admin/system-diagnostics', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+  //     body: JSON.stringify({ token: token, action: 'run' })
+  //   });
+  // }
+</script>
+
 <div class="card">
   <div class="card-header">
     <h2><i class="fa-solid fa-file-lines"></i> Submitted User Information</h2>

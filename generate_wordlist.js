@@ -10,7 +10,7 @@ const realPaths = [
   'login', 'register', 'logout', 'search', 'profile', 'transfer',
   'admin', 'admin/dashboard', 'admin/reports',
   'jwt', 'jwt/login', 'jwt/admin',
-  'api', 'api/secret', 'api/users', 'api/admin', 'api/admin/secret-flag',
+  'api', 'api/secret', 'api/users', 'api/admin', 'api/admin/system-diagnostics',
   'submit-flag', 'scoreboard',
   'js/config.js', 'js/app.js', 'css/style.css',
   'public', 'dashboard', 'reports'
