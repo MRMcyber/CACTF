@@ -15,6 +15,14 @@ app.use(expressLayouts);
 app.set('layout', 'layout');
 
 // Middleware
+// Vercel pre-parses request bodies, which can conflict with Express parsers.
+// This middleware ensures req.body is available in both environments.
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next(); // Body already parsed by Vercel
+  }
+  next();
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
