@@ -1,0 +1,146 @@
+<div class="page-header">
+  <h1>Marketplace &amp; Upgrades</h1>
+  <p>Enhance your CACTF workspace with premium add-ons</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: start;">
+  <!-- Product Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+    
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 160px; object-fit: cover;" alt="Analytics">
+      <div style="padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column;">
+        <h3 style="margin-top: 0;">Advanced Analytics</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1;">Deep dive into your customer data with ML-powered insights and custom reporting dashboards.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <span style="font-weight: 600; font-size: 1.1rem;">$49.99<span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">/mo</span></span>
+          <button class="btn btn-sm btn-ghost" onclick="alert('Insufficient permissions to add to workspace.')">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 160px; object-fit: cover;" alt="Support">
+      <div style="padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column;">
+        <h3 style="margin-top: 0;">Priority Support</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1;">24/7 phone support, a dedicated account manager, and guaranteed 1-hour SLA response times.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <span style="font-weight: 600; font-size: 1.1rem;">$99.00<span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">/mo</span></span>
+          <button class="btn btn-sm btn-ghost" onclick="alert('Insufficient permissions to add to workspace.')">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 2px solid var(--primary-color); position: relative;">
+      <div style="position: absolute; background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: bold; border-bottom-right-radius: 6px;">VIP EXCLUSIVE</div>
+      <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 160px; object-fit: cover;" alt="Enterprise">
+      <div style="padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column;">
+        <h3 style="margin-top: 0;">Enterprise Master Key</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1;">Unlock full platform access. Contains the elusive CTF target flag.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <span style="font-weight: 600; font-size: 1.1rem;">$500.00</span>
+          <button class="btn btn-sm btn-primary" onclick="buyFlag()"><i class="fa-solid fa-cart-shopping"></i> Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart / Promo Sidebar -->
+  <div class="card" style="background: #f8fafc; border: 1px solid #e2e8f0; position: sticky; top: 2rem;">
+    <h3 style="margin-top: 0; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem;"><i class="fa-solid fa-wallet" style="color: var(--primary-color);"></i> Workspace Wallet</h3>
+    
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; align-items: center;">
+      <span style="color: var(--text-secondary); font-size: 0.9rem;">Available Balance</span>
+      <span style="font-weight: 600; font-size: 1.5rem; color: #0f172a;">$<%= typeof balance !== 'undefined' ? balance.toFixed(2) : '0.00' %></span>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="promoCode" style="font-size: 0.85rem; font-weight: 600; color: #334155;">Redeem Promo Code</label>
+      <div style="display: flex; gap: 8px; margin-top: 0.25rem;">
+        <input type="text" id="promoCode" placeholder="Enter code (e.g. WELCOME10)" style="padding: 0.5rem; font-size: 0.9rem; background: white;">
+        <button onclick="redeemPromo()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Apply</button>
+      </div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;"><i class="fa-solid fa-circle-info"></i> Limit one use per account.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 3rem;">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2><i class="fa-solid fa-comments"></i> Product Reviews</h2>
+    <form action="/store" method="GET" style="display: flex; gap: 8px;">
+      <input type="text" name="review_q" placeholder="Search reviews..." value="<%= typeof review_q !== 'undefined' && review_q ? review_q : '' %>" style="padding: 0.25rem 0.5rem; font-size: 0.9rem;">
+      <button class="btn btn-sm btn-primary">Search</button>
+    </form>
+  </div>
+  
+  <% if (typeof xss_flag !== 'undefined' && xss_flag) { %>
+    <div class="flag-banner" style="margin-top: 1rem; margin-bottom: 1rem;">
+      <h2>🚨 Flag Captured</h2>
+      <p>Reflected XSS detected!</p>
+      <div class="flag-code"><%= xss_flag %></div>
+      <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+    </div>
+  <% } %>
+
+  <% if (typeof review_q !== 'undefined' && review_q) { %>
+    <p style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 6px;">Showing review results for: <strong><%- review_q %></strong></p>
+  <% } %>
+  
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <strong>John D.</strong> 
+      <span style="color: #fbbf24; font-size: 0.85rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">The Enterprise Master Key changed my life. Worth every penny to get that sweet, sweet flag.</p>
+  </div>
+  
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <strong>Sarah M.</strong> 
+      <span style="color: #fbbf24; font-size: 0.85rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">Advanced analytics are great, but the UI takes some getting used to. Priority support is definitely required for larger teams.</p>
+  </div>
+</div>
+
+<script>
+async function redeemPromo() {
+  const code = document.getElementById('promoCode').value;
+  if(!code) return alert('Please enter a promo code');
+  
+  try {
+    const res = await fetch('/api/promo/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('🎉 Success: ' + data.message);
+      location.reload();
+    } else {
+      alert('❌ Error: ' + data.error);
+    }
+  } catch(e) {
+    alert('Network error occurred.');
+  }
+}
+
+async function buyFlag() {
+  if (!confirm('Are you sure you want to purchase the Enterprise Master Key for $500.00?')) return;
+  
+  try {
+    const res = await fetch('/api/store/buy-flag', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert('🏆 Purchase Successful! Flag captured: ' + data.flag);
+      location.reload();
+    } else {
+      alert('❌ Error: ' + data.error);
+    }
+  } catch(e) {
+    alert('Network error occurred.');
+  }
+}
+</script>

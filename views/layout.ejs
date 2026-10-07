@@ -46,8 +46,11 @@
         <div class="sidebar-section">
           <div class="sidebar-section-label">Main</div>
           <a href="/profile" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Dashboard') ? ' active' : '' %>"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+          <% if (user && user.role === 'admin') { %>
           <a href="/search" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Customer') ? ' active' : '' %>"><i class="fa-solid fa-users"></i> Customers</a>
+          <% } %>
           <a href="/transfer" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Billing') ? ' active' : '' %>"><i class="fa-solid fa-file-invoice-dollar"></i> Billing</a>
+          <a href="/store" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Marketplace') ? ' active' : '' %>"><i class="fa-solid fa-store"></i> Marketplace</a>
         </div>
 
         <div class="sidebar-section">

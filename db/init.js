@@ -10,6 +10,10 @@ const path = require('path');
 const fs = require('fs');
 
 async function initDatabase() {
+  // Drop old tables to force schema update
+  await query('DROP TABLE IF EXISTS users CASCADE');
+  await query('DROP TABLE IF EXISTS flags CASCADE');
+
   // Create tables
   await query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -23,6 +27,7 @@ async function initDatabase() {
       balance REAL DEFAULT 1000.00,
       role TEXT DEFAULT 'user',
       bio TEXT DEFAULT '',
+      promo_used BOOLEAN DEFAULT FALSE,
       created_at TEXT
     )
   `);
@@ -46,9 +51,9 @@ async function initDatabase() {
 
   // Insert admin user
   await query(
-    `INSERT INTO users (username, password, email, full_name, phone, ssn, balance, role, bio, created_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-    ['admin', 'admin', 'admin@ctf-platform.local', 'System Administrator', '+1-555-000-0000', '000-00-0000', 99999.00, 'admin', 'Platform administrator account', new Date().toISOString()]
+    `INSERT INTO users (username, password, email, full_name, phone, ssn, balance, role, bio, promo_used, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+    ['admin', 'admin', 'admin@ctf-platform.local', 'System Administrator', '+1-555-000-0000', '000-00-0000', 99999.00, 'admin', 'Platform administrator account', false, new Date().toISOString()]
   );
 
   // Common weak passwords for realism
@@ -75,7 +80,8 @@ async function initDatabase() {
     const fullName = faker.person.fullName();
     const phone = faker.phone.number({ style: 'national' });
     const ssn = `${faker.number.int({min:100,max:999})}-${faker.number.int({min:10,max:99})}-${faker.number.int({min:1000,max:9999})}`;
-    const balance = parseFloat((Math.random() * 4900 + 100).toFixed(2));
+    // Make starting balance low so they can't buy the $500 flag easily without exploiting the race condition
+    const balance = parseFloat((Math.random() * 50 + 10).toFixed(2));
     const bio = faker.lorem.sentence();
     const createdAt = faker.date.past({ years: 2 }).toISOString();
 
@@ -84,18 +90,19 @@ async function initDatabase() {
 
     users.push({
       username, password, email, fullName, phone,
-      ssn: actualSsn, balance, bio, createdAt
+      ssn: actualSsn, balance, bio, promo_used: false, createdAt
     });
 
     await query(
-      `INSERT INTO users (username, password, email, full_name, phone, ssn, balance, role, bio, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [username, password, email, fullName, phone, actualSsn, balance, 'user', bio, createdAt]
+      `INSERT INTO users (username, password, email, full_name, phone, ssn, balance, role, bio, promo_used, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [username, password, email, fullName, phone, actualSsn, balance, 'user', bio, false, createdAt]
     );
   }
 
   // Insert flags
   const flags = [
+    // Old 8 Flags
     ['sqli_basic', 'flag{194827}', 5],
     ['xss_reflected', 'flag{857391}', 5],
     ['hardcoded_creds', 'flag{402851}', 5],
@@ -103,12 +110,21 @@ async function initDatabase() {
     ['csrf_transfer', 'flag{294851}', 10],
     ['idor_access', 'flag{581930}', 10],
     ['jwt_manipulation', 'flag{602941}', 10],
-    ['stored_xss_chain', 'flag{391023}', 30]
+    ['stored_xss_chain', 'flag{391023}', 30],
+    
+    // New 7 Flags
+    ['html_comment', 'flag{102938}', 5],
+    ['api_overfetch', 'flag{485729}', 5],
+    ['negative_transfer', 'flag{837465}', 5],
+    ['robots_txt', 'flag{592837}', 5],
+    ['lfi_traversal', 'flag{384756}', 10],
+    ['ssrf_metadata', 'flag{918273}', 10],
+    ['race_condition', 'flag{746352}', 30]
   ];
 
   for (const [challenge, flag, points] of flags) {
     await query(
-      'INSERT INTO flags (challenge, flag, points) VALUES ($1, $2, $3)',
+      'INSERT INTO flags (challenge, flag, points) VALUES ($1, $2, $3) ON CONFLICT (challenge) DO UPDATE SET flag = EXCLUDED.flag, points = EXCLUDED.points',
       [challenge, flag, points]
     );
   }

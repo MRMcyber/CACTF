@@ -31,3 +31,39 @@
     <p style="font-size:.85rem;color:var(--text-secondary)">Use this token to access protected endpoints. <a href="/jwt/admin">Access Security Operations &rarr;</a></p>
   </div>
 <% } %>
+
+<div class="card" style="max-width: 540px; margin-top: 2rem;">
+  <div class="card-header">
+    <h2><i class="fa-solid fa-satellite-dish"></i> Webhook Delivery Tester</h2>
+    <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">Test your application's ability to receive CACTF webhook events.</p>
+  </div>
+  <div class="form-group">
+    <label for="webhookUrl">Target URL</label>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="webhookUrl" placeholder="https://your-domain.com/webhook" required>
+      <button onclick="testWebhook()" class="btn btn-primary">Test</button>
+    </div>
+  </div>
+  <div id="webhookResult" style="margin-top: 1rem; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; display: none; font-family: monospace; white-space: pre-wrap; word-break: break-all;"></div>
+</div>
+
+<script>
+async function testWebhook() {
+  const url = document.getElementById('webhookUrl').value;
+  const resultDiv = document.getElementById('webhookResult');
+  resultDiv.style.display = 'block';
+  resultDiv.textContent = 'Testing...';
+  
+  try {
+    const res = await fetch('/api/webhook/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    resultDiv.textContent = data.result || data.error;
+  } catch (e) {
+    resultDiv.textContent = 'Network error testing webhook.';
+  }
+}
+</script>

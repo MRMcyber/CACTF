@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api
+Disallow: /api/v1/dev-test-flag-endpoint-do-not-index

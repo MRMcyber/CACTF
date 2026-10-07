@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../db/database');
 
-// GET /search - VULNERABLE TO REFLECTED XSS
+// GET /search - Admin only customer search
 router.get('/', async (req, res) => {
-  const q = req.query.q || '';
-  let xss_flag = null;
-  if (q.includes('<script>') || q.includes('onerror=')) {
-      xss_flag = 'flag{857391}';
+  if (!req.session.user) return res.redirect('/login');
+  if (req.session.user.role !== 'admin') {
+    return res.status(403).send('Forbidden: This page is restricted to administrators.');
   }
+
+  const q = req.query.q || '';
   let results = [];
 
   if (q) {
@@ -25,7 +26,6 @@ router.get('/', async (req, res) => {
     message: null,
     error: null,
     query: q,
-    xss_flag: xss_flag,
     results: results
   });
 });

@@ -11,6 +11,8 @@ const realPaths = [
   'admin', 'admin/dashboard', 'admin/reports',
   'jwt', 'jwt/login', 'jwt/admin',
   'api', 'api/secret', 'api/users', 'api/admin', 'api/admin/system-diagnostics',
+  'api/download', 'api/webhook/test', 'api/promo/redeem', 'api/store/buy-flag',
+  'api/user/session-info', 'api/v1/dev-test-flag-endpoint-do-not-index',
   'submit-flag', 'scoreboard',
   'js/config.js', 'js/app.js', 'css/style.css',
   'public', 'dashboard', 'reports'

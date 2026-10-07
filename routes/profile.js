@@ -58,4 +58,19 @@ router.get('/users/:id/profile', async (req, res) => {
   }
 });
 
+// GET /api/user/session-info - Excessive Data Exposure target
+router.get('/user/session-info', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  res.json({
+    id: req.session.user.id,
+    username: req.session.user.username,
+    role: req.session.user.role,
+    // Excessive data exposed in JSON response!
+    debug_flag: 'flag{485729}'
+  });
+});
+
 module.exports = router;

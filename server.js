@@ -66,6 +66,7 @@ const searchRoutes = require('./routes/search');
 const adminRoutes = require('./routes/admin');
 const profileRoutes = require('./routes/profile');
 const transferRoutes = require('./routes/transfer');
+const storeRoutes = require('./routes/store');
 const jwtAdminRoutes = require('./routes/jwt-admin');
 const apiRoutes = require('./routes/api');
 
@@ -74,6 +75,7 @@ app.use('/search', searchRoutes);
 app.use('/admin', adminRoutes);
 app.use('/profile', profileRoutes);
 app.use('/transfer', transferRoutes);
+app.use('/store', storeRoutes);
 app.use('/jwt', jwtAdminRoutes);
 app.use('/api', apiRoutes);
 app.use('/api', profileRoutes); // IDOR API route (/api/users/:id/profile)
@@ -85,10 +87,23 @@ function buildChallenges(foundFlags) {
     { name: 'Input Validation', points: 5, found: foundFlags.includes('xss_reflected') },
     { name: 'Information Disclosure', points: 5, found: foundFlags.includes('hardcoded_creds') },
     { name: 'Access Control', points: 5, found: foundFlags.includes('default_admin') },
+    
+    // New Easy Bugs
+    { name: 'Source Code Recon', points: 5, found: foundFlags.includes('html_comment') },
+    { name: 'API Over-fetching', points: 5, found: foundFlags.includes('api_overfetch') },
+    { name: 'Business Logic Flaw', points: 5, found: foundFlags.includes('negative_transfer') },
+    { name: 'Basic Reconnaissance', points: 5, found: foundFlags.includes('robots_txt') },
+    
+    // Medium
     { name: 'Session Security', points: 10, found: foundFlags.includes('csrf_transfer') },
     { name: 'Authorization', points: 10, found: foundFlags.includes('idor_access') },
     { name: 'Token Security', points: 10, found: foundFlags.includes('jwt_manipulation') },
-    { name: 'Advanced Chaining', points: 30, found: foundFlags.includes('stored_xss_chain') }
+    { name: 'Directory Traversal', points: 10, found: foundFlags.includes('lfi_traversal') },
+    { name: 'Server-Side Request Forgery', points: 10, found: foundFlags.includes('ssrf_metadata') },
+    
+    // Hard
+    { name: 'Advanced Chaining', points: 30, found: foundFlags.includes('stored_xss_chain') },
+    { name: 'Race Condition (Concurrency)', points: 30, found: foundFlags.includes('race_condition') }
   ];
 }
 
@@ -107,7 +122,7 @@ app.get('/submit-flag', (req, res) => {
     error: null,
     challenges,
     totalScore,
-    maxScore: 80
+    maxScore: 150
   });
 });
 
@@ -145,7 +160,7 @@ app.post('/submit-flag', async (req, res) => {
     error,
     challenges,
     totalScore,
-    maxScore: 80
+    maxScore: 150
   });
 });
 

@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
   const { recipient, amount } = req.body;
   const transferAmount = parseFloat(amount);
 
-  if (!recipient || isNaN(transferAmount) || transferAmount <= 0) {
+  if (!recipient || isNaN(transferAmount) || transferAmount === 0) {
     const rows = await query('SELECT balance FROM users WHERE id = $1', [req.session.user.id]);
     const user = rows.length > 0 ? rows[0] : null;
     return res.render('transfer', {
@@ -41,6 +41,12 @@ router.post('/', async (req, res) => {
       balance: user ? user.balance : 0,
       flag: null
     });
+  }
+
+  // Easy 3: Negative Transfer Logic Flaw
+  let isNegativeExploit = false;
+  if (transferAmount < 0) {
+    isNegativeExploit = true;
   }
 
   const senderRows = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
@@ -85,6 +91,10 @@ router.post('/', async (req, res) => {
   let flag = null;
   if (updatedRecv.balance > 5000) {
     flag = 'flag{294851}';
+  }
+  
+  if (isNegativeExploit) {
+    flag = 'flag{837465}';
   }
 
   res.render('transfer', {
