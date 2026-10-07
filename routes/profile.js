@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db/database');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
+const upload = multer({ dest: path.join(__dirname, '../public/uploads/') });
 
 // GET /profile - Show logged-in user's profile
 router.get('/', async (req, res) => {
@@ -38,6 +43,43 @@ router.post('/update', async (req, res) => {
     title: 'Dashboard',
     user: req.session.user,
     message: 'Bio updated successfully!',
+    error: null,
+    profile: profile,
+    sqli_flag: req.session.sqli_flag || null
+  });
+});
+
+// GET /profile/avatar - Path traversal vulnerability!
+router.get('/avatar', (req, res) => {
+  const file = req.query.f || 'default.png';
+  // VULNERABLE: No validation or sanitization on 'file'
+  const filePath = path.join(__dirname, '../public/uploads', file);
+  
+  try {
+    const data = fs.readFileSync(filePath);
+    res.send(data);
+  } catch (err) {
+    res.status(404).send('Avatar not found');
+  }
+});
+
+// POST /profile/upload - Handle file upload
+router.post('/upload', upload.single('avatar'), async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  if (req.file) {
+    req.session.user.avatar = req.file.filename;
+  }
+
+  const rows = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+  const profile = rows.length > 0 ? rows[0] : null;
+
+  res.render('profile', {
+    title: 'Dashboard',
+    user: req.session.user,
+    message: 'Avatar uploaded successfully!',
     error: null,
     profile: profile,
     sqli_flag: req.session.sqli_flag || null

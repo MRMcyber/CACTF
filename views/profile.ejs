@@ -124,6 +124,25 @@
 
 <div class="card">
   <div class="card-header">
+    <h2><i class="fa-solid fa-camera"></i> Profile Picture</h2>
+  </div>
+  
+  <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1rem;">
+    <div>
+      <img src="/profile/avatar?f=<%= typeof user !== 'undefined' && user.avatar ? user.avatar : 'default.png' %>" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border);">
+    </div>
+    <form action="/profile/upload" method="POST" enctype="multipart/form-data" style="flex: 1;">
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label for="avatar">Upload new avatar</label>
+        <input type="file" id="avatar" name="avatar" accept="image/*" required style="padding: 0.5rem; border: 1px dashed var(--border); border-radius: 8px; width: 100%; display: block; margin-top: 0.25rem;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-upload"></i> Upload</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
     <h2><i class="fa-solid fa-pen-to-square"></i> Update Bio</h2>
   </div>
 

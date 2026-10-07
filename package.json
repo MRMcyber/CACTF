@@ -25,6 +25,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.4.0",
     "sql.js": "^1.11.0"
   }
 }
