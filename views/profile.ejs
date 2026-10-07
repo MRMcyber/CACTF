@@ -134,6 +134,7 @@
     <form action="/profile/upload" method="POST" enctype="multipart/form-data" style="flex: 1;">
       <div class="form-group" style="margin-bottom: 0.75rem;">
         <label for="avatar">Upload new avatar</label>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;"><i class="fa-solid fa-folder"></i> Saves to <code>/public/uploads/</code></div>
         <input type="file" id="avatar" name="avatar" accept="image/*" required style="padding: 0.5rem; border: 1px dashed var(--border); border-radius: 8px; width: 100%; display: block; margin-top: 0.25rem;">
       </div>
       <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-upload"></i> Upload</button>

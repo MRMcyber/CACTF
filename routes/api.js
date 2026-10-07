@@ -23,15 +23,8 @@ router.get('/secret', (req, res) => {
 
 // POST /api/admin/system-diagnostics - Second-order XSS chain target
 router.post('/admin/system-diagnostics', (req, res) => {
-  const { token, action } = req.body;
-  
-  if (!token || token !== req.session.report_token) {
-    return res.status(403).json({
-      success: false,
-      error: 'Invalid or missing CSRF token'
-    });
-  }
-
+  // SIMPLIFIED FOR 1HR CTF: CSRF token check removed.
+  // Players only need to figure out the XMLHttpRequest header spoofing.
   if (req.headers['x-requested-with'] !== 'XMLHttpRequest') {
     return res.status(403).json({
       success: false,
@@ -82,7 +75,7 @@ router.post('/webhook/test', async (req, res) => {
   }
 });
 
-// Extreme Hard: Race Condition (TOCTOU)
+// Simplified Hard: Logic Flaw (Replay Attack)
 const { query } = require('../db/database');
 
 router.post('/promo/redeem', async (req, res) => {
@@ -91,16 +84,11 @@ router.post('/promo/redeem', async (req, res) => {
   if (code !== 'WELCOME10') return res.status(400).json({ error: 'Invalid code' });
   
   try {
-    const userRows = await query('SELECT promo_used FROM users WHERE id = $1', [req.session.user.id]);
-    if (userRows[0].promo_used) return res.status(400).json({ error: 'Promo already redeemed' });
+    // SIMPLIFIED FOR 1HR CTF: Removed the 'promo_used' state check and race condition delay.
+    // Increased payout to $100 so they only have to submit it 5 times.
+    await query('UPDATE users SET balance = balance + 100 WHERE id = $1', [req.session.user.id]);
 
-    // Widen the race window artificially to make it solvable in a remote/serverless context
-    await new Promise(r => setTimeout(r, 200));
-
-    await query('UPDATE users SET balance = balance + 10 WHERE id = $1', [req.session.user.id]);
-    await query('UPDATE users SET promo_used = TRUE WHERE id = $1', [req.session.user.id]);
-
-    res.json({ success: true, message: 'Redeemed $10!' });
+    res.json({ success: true, message: 'Redeemed $100!' });
   } catch (e) {
     res.status(500).json({ error: 'Database error' });
   }

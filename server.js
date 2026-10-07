@@ -83,27 +83,27 @@ app.use('/api', profileRoutes); // IDOR API route (/api/users/:id/profile)
 // ── Challenges list builder ──
 function buildChallenges(foundFlags) {
   return [
-    { name: 'Authentication Bypass', points: 5, found: foundFlags.includes('sqli_basic') },
-    { name: 'Input Validation', points: 5, found: foundFlags.includes('xss_reflected') },
-    { name: 'Information Disclosure', points: 5, found: foundFlags.includes('hardcoded_creds') },
-    { name: 'Access Control', points: 5, found: foundFlags.includes('default_admin') },
-    
-    // New Easy Bugs
-    { name: 'Source Code Recon', points: 5, found: foundFlags.includes('html_comment') },
-    { name: 'API Over-fetching', points: 5, found: foundFlags.includes('api_overfetch') },
-    { name: 'Business Logic Flaw', points: 5, found: foundFlags.includes('negative_transfer') },
-    { name: 'Basic Reconnaissance', points: 5, found: foundFlags.includes('robots_txt') },
+    // Easy
+    { name: 'Authentication Bypass', points: 5, found: foundFlags.includes('sqli_basic'), hint: 'Sometimes logging in is as easy as knowing who you want to be, and ignoring the rest. Pay attention to quotes.' },
+    { name: 'Input Validation', points: 5, found: foundFlags.includes('xss_reflected'), hint: 'Does the store search page trust your input too much? Try running a classic alert(1) payload.' },
+    { name: 'Information Disclosure', points: 5, found: foundFlags.includes('hardcoded_creds'), hint: 'Developers often leave sensitive keys directly in the frontend JavaScript or backend routes. Look closely at the API endpoints.' },
+    { name: 'Access Control', points: 5, found: foundFlags.includes('default_admin'), hint: 'If an admin account exists, did the developer bother changing the default password from something like admin/admin?' },
+    { name: 'Source Code Recon', points: 5, found: foundFlags.includes('html_comment'), hint: 'Sometimes developers leave notes for themselves in the HTML source code. View Source on the main pages.' },
+    { name: 'API Over-fetching', points: 5, found: foundFlags.includes('api_overfetch'), hint: 'Does the session info API endpoint return more data than what is actually displayed on the screen? Inspect the JSON.' },
+    { name: 'Business Logic Flaw', points: 5, found: foundFlags.includes('negative_transfer'), hint: 'Can you transfer a negative amount of money to someone else? What happens to your balance if you do?' },
+    { name: 'Basic Reconnaissance', points: 5, found: foundFlags.includes('robots_txt'), hint: 'Bots need instructions on what NOT to crawl. Where do websites typically store these instructions?' },
     
     // Medium
-    { name: 'Session Security', points: 10, found: foundFlags.includes('csrf_transfer') },
-    { name: 'Authorization', points: 10, found: foundFlags.includes('idor_access') },
-    { name: 'Token Security', points: 10, found: foundFlags.includes('jwt_manipulation') },
-    { name: 'Directory Traversal', points: 10, found: foundFlags.includes('lfi_traversal') },
-    { name: 'Server-Side Request Forgery', points: 10, found: foundFlags.includes('ssrf_metadata') },
+    { name: 'Session Security (Massive Transfer)', points: 10, found: foundFlags.includes('csrf_transfer'), hint: 'If you can manipulate your balance to be extremely high, try transferring a massive amount (over 5000) to another user.' },
+    { name: 'Authorization (IDOR)', points: 10, found: foundFlags.includes('idor_access'), hint: 'The API lets you fetch your own profile by ID. What happens if you just change the ID number to someone else (e.g., ID 5)?' },
+    { name: 'Token Security (JWT)', points: 10, found: foundFlags.includes('jwt_manipulation'), hint: 'The SOC Admin panel uses a JWT. We left a comment in the source about the secret key. Forge a token with the "admin" role.' },
+    { name: 'Directory Traversal', points: 10, found: foundFlags.includes('lfi_traversal'), hint: 'The invoice download API takes a filename. Can you force it to download the backend `.env` file instead using ../ ?' },
+    { name: 'Server-Side Request Forgery', points: 10, found: foundFlags.includes('ssrf_metadata'), hint: 'The Webhook tester will fetch any URL. In cloud environments like AWS, the magic IP 169.254.169.254 holds metadata.' },
+    { name: 'Avatar Path Traversal', points: 10, found: foundFlags.includes('path_traversal_master'), hint: 'Your profile avatar is loaded via ?f=filename. Try traversing back out of /public/uploads/ (e.g. ../../) to read traversal_flag.txt' },
     
     // Hard
-    { name: 'Advanced Chaining', points: 30, found: foundFlags.includes('stored_xss_chain') },
-    { name: 'Race Condition (Concurrency)', points: 30, found: foundFlags.includes('race_condition') }
+    { name: 'Advanced Chaining (XSS)', points: 30, found: foundFlags.includes('stored_xss_chain'), hint: 'The System Diagnostics endpoint expects an XMLHttpRequest. Can you craft a payload to spoof this?' },
+    { name: 'Logic Flaw (Infinite Promo)', points: 30, found: foundFlags.includes('race_condition'), hint: 'The Promo Code WELCOME10 gives you money, and the developer forgot to mark it as used. Keep redeeming it until you can buy the Master Key!' }
   ];
 }
 

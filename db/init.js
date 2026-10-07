@@ -119,7 +119,10 @@ async function initDatabase() {
     ['robots_txt', 'flag{592837}', 5],
     ['lfi_traversal', 'flag{384756}', 10],
     ['ssrf_metadata', 'flag{918273}', 10],
-    ['race_condition', 'flag{746352}', 30]
+    ['race_condition', 'flag{746352}', 30],
+    
+    // New Features
+    ['path_traversal_master', 'flag{path_traversal_master_9921}', 10]
   ];
 
   for (const [challenge, flag, points] of flags) {
