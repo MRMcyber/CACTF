@@ -136,7 +136,7 @@
     <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
       <span style="font-size: 1.75rem; font-weight: 800; color: #111827;">$49</span><span style="color: #9ca3af; font-size: 0.95rem;">/mo</span>
     </div>
-    <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
+    <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('There\'s no flag here!')">Add to Workspace</button>
   </div>
 
   <!-- Product 2: WAF -->
@@ -255,6 +255,8 @@
   }
 
   async function buyFlag() {
+    if (!confirm('Confirm purchase of Enterprise Master Key for $500.00?')) return;
+    
     try {
       const res = await fetch('/api/buy-flag', {
         method: 'POST',
