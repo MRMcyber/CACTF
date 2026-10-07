@@ -1,47 +1,97 @@
-<div class="page-header">
-  <h1>Dashboard</h1>
+<div class="page-header" style="margin-bottom: 1.5rem;">
+  <h1 style="color: var(--text);">Overview</h1>
 </div>
 
 <% if (typeof sqli_flag !== 'undefined' && sqli_flag) { %>
-  <div class="flag-banner">
-    <h2>🚨 Flag Captured</h2>
-    <p>Authentication bypass successful!</p>
-    <div class="flag-code"><%= sqli_flag %></div>
-    <p style="margin-top:.75rem;font-size:.85rem">Submit this on the Flag Submission page.</p>
+  <div class="flag-banner" style="background: #ef4444; color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-flag"></i> Flag Captured</h2>
+    <p style="font-size: 0.9rem; margin-bottom: 0.75rem;">Authentication bypass successful!</p>
+    <div style="background: rgba(0,0,0,0.2); display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; font-family: monospace; font-size: 1.1rem; font-weight: 700;"><%= sqli_flag %></div>
   </div>
 <% } %>
 
-<div class="metrics-grid">
-  <div class="metric-card">
-    <div class="metric-label"><i class="fa-solid fa-wallet"></i> Account Balance</div>
-    <div class="metric-value">$<%= (profile && profile.balance != null) ? (typeof profile.balance === 'number' ? profile.balance.toFixed(2) : parseFloat(profile.balance).toFixed(2)) : '0.00' %></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+  <div class="card" style="padding: 1.25rem; margin-bottom: 0;">
+    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Account Balance</div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 1.8rem; font-weight: 700; color: var(--text);">$<%= (profile && profile.balance != null) ? (typeof profile.balance === 'number' ? profile.balance.toFixed(2) : parseFloat(profile.balance).toFixed(2)) : '0.00' %></div>
+      <div style="color: #ef4444; font-size: 0.7rem; font-weight: 700; background: #fef2f2; padding: 2px 6px; border-radius: 4px;">10% &darr;</div>
+    </div>
   </div>
 
-  <div class="metric-card">
-    <div class="metric-label"><i class="fa-solid fa-circle-check"></i> Account Status</div>
-    <div class="metric-value" style="color: var(--success);">Active</div>
+  <div class="card" style="padding: 1.25rem; margin-bottom: 0;">
+    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Account Status</div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 1.5rem; font-weight: 700; color: var(--text);">Active</div>
+      <div style="color: #10b981; font-size: 0.7rem; font-weight: 700; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">100% &uarr;</div>
+    </div>
   </div>
 
-  <div class="metric-card">
-    <div class="metric-label"><i class="fa-solid fa-calendar"></i> Member Since</div>
-    <div class="metric-value" style="font-size: 1.25rem;">
-      <%= (profile && profile.created_at) ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A' %>
+  <div class="card" style="padding: 1.25rem; margin-bottom: 0;">
+    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Member Since</div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--text); margin-top: 0.4rem;">
+        <%= (profile && profile.created_at) ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 1.25rem; margin-bottom: 0;">
+    <div style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Total Orders</div>
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-size: 1.8rem; font-weight: 700; color: var(--text);">1000</div>
+      <div style="color: #10b981; font-size: 0.7rem; font-weight: 700; background: #ecfdf5; padding: 2px 6px; border-radius: 4px;">10% &uarr;</div>
     </div>
   </div>
 </div>
 
-<!-- Fake Revenue Chart -->
-<div class="card" style="margin-bottom: 2rem;">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-    <h2><i class="fa-solid fa-chart-area"></i> Revenue Overview</h2>
-    <div style="font-size: 0.85rem; background: #f1f5f9; padding: 0.25rem 0.75rem; border-radius: 99px;">Last 30 Days</div>
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+  <!-- Bar Chart (Statistics) -->
+  <div class="card" style="margin-bottom: 0; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 0;">Statistics</h3>
+      <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">
+        <span style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></div> Sales</span>
+        <span style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #93c5fd;"></div> Returns</span>
+      </div>
+    </div>
+    
+    <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); position: relative;">
+      <!-- Y Axis -->
+      <div style="position: absolute; left: 0; top: 0; bottom: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--text-muted); font-size: 0.65rem;">
+        <span>50k</span><span>40k</span><span>30k</span><span>20k</span><span>10k</span><span>0</span>
+      </div>
+      <!-- Bars -->
+      <div style="width: 100%; display: flex; align-items: flex-end; justify-content: space-around; padding-left: 2rem;">
+        <div style="width: 15px; height: 60%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 80%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 40%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 75%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 90%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 50%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+        <div style="width: 15px; height: 85%; background: var(--primary); border-radius: 4px 4px 0 0;"></div>
+      </div>
+    </div>
   </div>
-  <div style="width: 100%; height: 250px; background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80') center center / cover no-repeat; border-radius: 8px; opacity: 0.9; margin-top: 1rem;"></div>
+
+  <!-- Donut Chart (Sales Breakdown) -->
+  <div class="card" style="margin-bottom: 0; padding: 1.5rem; display: flex; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 0;">Sales Breakdown</h3>
+      <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--bg); padding: 2px 8px; border-radius: 12px;">Items &darr;</span>
+    </div>
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+      <!-- CSS Donut Chart -->
+      <div style="width: 180px; height: 180px; border-radius: 50%; background: conic-gradient(var(--primary) 0% 45%, #60a5fa 45% 70%, #93c5fd 70% 90%, #dbeafe 90% 100%); display: flex; align-items: center; justify-content: center; position: relative;">
+        <div style="width: 140px; height: 140px; background: white; border-radius: 50%;"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <h2><i class="fa-solid fa-user"></i> Account Details</h2>
+  <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1rem; font-weight: 700;"><i class="fa-solid fa-user"></i> Account Details</h2>
   </div>
 
   <div class="info-row">

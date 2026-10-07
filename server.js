@@ -19,7 +19,7 @@ app.set('layout', 'layout');
 // This middleware ensures req.body is available in both environments.
 app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-    return next(); // Body already parsed by Vercel
+    req._body = true; // Tell Express body-parser that the body is already parsed
   }
   next();
 });
