@@ -1,26 +1,42 @@
 <style>
-  .store-container { display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; align-items: start; }
-  .sticky-sidebar { position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+  .store-header-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
   
-  .wallet-card {
+  .wallet-horizontal {
     background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-    border-radius: 16px;
-    padding: 1.75rem;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
     color: white;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15);
   }
-  .wallet-card::before {
-    content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background: rgba(99, 102, 241, 0.4); border-radius: 50%; filter: blur(40px);
+  .wallet-horizontal::before {
+    content: ''; position: absolute; right: -30px; top: -50px; width: 150px; height: 150px; background: rgba(99, 102, 241, 0.4); border-radius: 50%; filter: blur(40px); pointer-events: none;
   }
   
-  .promo-card { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .promo-horizontal {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  }
   
   .hero-banner {
     background: linear-gradient(120deg, #eff6ff 0%, #e0e7ff 100%);
     border-radius: 16px;
-    padding: 2.5rem;
+    padding: 2.5rem 3rem;
     margin-bottom: 2.5rem;
     border: 1px solid #c7d2fe;
     display: flex;
@@ -28,21 +44,36 @@
     align-items: center;
   }
   
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .product-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 1.5rem; 
+    margin-bottom: 3rem; 
+  }
   
   .product-card {
-    background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.75rem; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
+    background: white; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 12px; 
+    padding: 1.75rem; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: flex; 
+    flex-direction: column;
   }
   .product-card:hover {
-    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08); border-color: #cbd5e1; transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08); 
+    border-color: #cbd5e1; 
+    transform: translateY(-2px);
   }
   .product-icon {
     width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1.5rem;
   }
   
   .reviews-section {
-    margin-top: 3rem; background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 2rem;
+    background: white; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 16px; 
+    padding: 2rem;
   }
 </style>
 
@@ -51,150 +82,152 @@
   <p style="color: #6b7280;">Equip your environment with enterprise-grade security tools.</p>
 </div>
 
-<div class="store-container">
-  <!-- LEFT COLUMN: Sticky Workspace Wallet & Promo -->
-  <div class="sticky-sidebar">
-    
-    <!-- Workspace Wallet Card -->
-    <div class="wallet-card">
-      <div style="font-size: 0.85rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-wallet"></i> Workspace Wallet</div>
-      <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.25rem;">Available Balance</div>
-      <div style="font-weight: 800; font-size: 2.25rem; color: white; letter-spacing: -0.02em;">$<%= typeof balance !== 'undefined' ? (typeof balance === 'number' ? balance.toFixed(2) : parseFloat(balance).toFixed(2)) : '0.00' %></div>
-    </div>
-
-    <!-- Promo Code Card -->
-    <div class="promo-card">
-      <label for="promoCode" style="display: block; font-size: 0.85rem; font-weight: 700; color: #374151; margin-bottom: 0.75rem;">Redeem Promo Code</label>
-      <div style="display: flex; gap: 8px;">
-        <input type="text" id="promoCode" placeholder="e.g. WELCOME10" style="flex: 1; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;">
-        <button onclick="redeemPromo()" class="btn btn-primary" style="border-radius: 8px; padding: 0.6rem 1.25rem;">Apply</button>
+<!-- Horizontal Header Panel (Wallet & Promo) -->
+<div class="store-header-panel">
+  
+  <!-- Workspace Wallet (Top Left) -->
+  <div class="wallet-horizontal">
+    <div style="position: relative; z-index: 2;">
+      <div style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Workspace Wallet</div>
+      <div style="font-weight: 800; font-size: 2.25rem; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 0.75rem; line-height: 1;">
+        $<%= typeof balance !== 'undefined' ? (typeof balance === 'number' ? balance.toFixed(2) : parseFloat(balance).toFixed(2)) : '0.00' %>
+        <span style="font-size: 0.8rem; font-weight: 600; color: #10b981; background: rgba(16,185,129,0.15); padding: 4px 10px; border-radius: 99px; letter-spacing: 0; transform: translateY(-4px);">Available</span>
       </div>
-      <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem; margin-bottom: 0;"><i class="fa-solid fa-shield-halved"></i> Secured transaction. Limit 1 per user.</p>
     </div>
+    <i class="fa-solid fa-wallet" style="font-size: 3.5rem; opacity: 0.1; position: relative; z-index: 2;"></i>
   </div>
 
-  <!-- RIGHT COLUMN: Storefront & Reviews -->
+  <!-- Promo Code -->
+  <div class="promo-horizontal">
+    <div style="flex-shrink: 0;">
+      <label for="promoCode" style="display: block; font-size: 0.95rem; font-weight: 700; color: #1f2937; margin-bottom: 0.15rem;">Redeem Promo</label>
+      <div style="font-size: 0.8rem; color: #6b7280;">Apply voucher code</div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-grow: 1;">
+      <input type="text" id="promoCode" placeholder="e.g. WELCOME10" style="flex: 1; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; min-width: 0;">
+      <button onclick="redeemPromo()" class="btn btn-primary" style="border-radius: 8px; padding: 0.6rem 1.25rem; font-weight: 600; flex-shrink: 0;">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full-Width Hero Banner -->
+<div class="hero-banner">
   <div>
-    <!-- Hero Banner -->
-    <div class="hero-banner">
+    <div style="background: #c7d2fe; color: #4338ca; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; display: inline-block; margin-bottom: 1rem;">Q4 RELEASE</div>
+    <h2 style="font-size: 2.25rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Next-Gen Security Stack.</h2>
+    <p style="font-size: 1.15rem; color: #4338ca; font-weight: 500; margin: 0;">Upgrade your CTF capabilities instantly.</p>
+  </div>
+  <div style="font-size: 6rem; color: #6366f1; opacity: 0.15; transform: rotate(15deg);">
+    <i class="fa-solid fa-shield-halved"></i>
+  </div>
+</div>
+
+<!-- Product Grid -->
+<div class="product-grid">
+  
+  <!-- Product 1: Threat Intel -->
+  <div class="product-card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="product-icon" style="background: #f3f4f6; color: #4b5563;"><i class="fa-solid fa-satellite-dish"></i></div>
+      <span style="background: #f3f4f6; color: #4b5563; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">STANDARD</span>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">Threat Intel API</h3>
+    <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Real-time feed of known malicious IPs and vulnerability signatures.</p>
+    <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <span style="font-size: 1.75rem; font-weight: 800; color: #111827;">$49</span><span style="color: #9ca3af; font-size: 0.95rem;">/mo</span>
+    </div>
+    <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
+  </div>
+
+  <!-- Product 2: WAF -->
+  <div class="product-card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="product-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-server"></i></div>
+      <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">SAVE 20%</span>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">Advanced WAF</h3>
+    <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Enterprise-grade web application firewall to protect against top OWASP threats.</p>
+    <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <span style="font-size: 1.75rem; font-weight: 800; color: #111827;">$199</span>
+      <span style="text-decoration: line-through; color: #9ca3af; font-size: 1rem;">$249</span>
+    </div>
+    <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
+  </div>
+
+  <!-- Product 3: Zero-Day Sandbox -->
+  <div class="product-card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="product-icon" style="background: #fef2f2; color: #ef4444;"><i class="fa-solid fa-bug"></i></div>
+      <span style="background: #fef2f2; color: #dc2626; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">HOT</span>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">0-Day Sandbox</h3>
+    <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Isolated detonation environment for executing and analyzing untrusted binaries.</p>
+    <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <span style="font-size: 1.75rem; font-weight: 800; color: #111827;">$299</span><span style="color: #9ca3af; font-size: 0.95rem;">/mo</span>
+    </div>
+    <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
+  </div>
+  
+  <!-- CTF Product (Real Purchase) -->
+  <div class="product-card" style="background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); border: 1px solid #fde68a; box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="product-icon" style="background: #fef3c7; color: #d97706; box-shadow: 0 4px 10px rgba(217,119,6,0.2);"><i class="fa-solid fa-key"></i></div>
+      <span style="background: #d97706; color: white; font-size: 0.75rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em;">VIP EXCLUSIVE</span>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #92400e;">Enterprise Master Key</h3>
+    <p style="color: #b45309; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Target objective. Unlock full system access to capture the final flag.</p>
+    <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <span style="font-size: 1.75rem; font-weight: 800; color: #92400e;">$500</span>
+    </div>
+    <button class="btn btn-primary" style="width: 100%; background: #d97706; font-weight: 700; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(217,119,6,0.3);" onclick="buyFlag()">Acquire Key</button>
+  </div>
+</div>
+
+<!-- Reviews Section -->
+<div class="reviews-section">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0;"><i class="fa-solid fa-comments" style="color: #9ca3af; margin-right: 0.5rem;"></i> Product Reviews</h2>
+    <form action="/store" method="GET" style="display: flex; gap: 8px;">
+      <input type="text" name="review_q" placeholder="Search reviews..." value="<%= typeof review_q !== 'undefined' && review_q ? review_q : '' %>" style="padding: 0.5rem 1rem; font-size: 0.95rem; border: 1px solid #d1d5db; border-radius: 8px; outline: none; min-width: 250px; transition: border-color 0.2s;">
+      <button class="btn" style="background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 600;">Search</button>
+    </form>
+  </div>
+
+  <% if (typeof xss_flag !== 'undefined' && xss_flag) { %>
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: flex-start;">
+      <i class="fa-solid fa-flag" style="margin-top: 4px; font-size: 1.2rem;"></i>
       <div>
-        <div style="background: #c7d2fe; color: #4338ca; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; display: inline-block; margin-bottom: 1rem;">Q4 RELEASE</div>
-        <h2 style="font-size: 2rem; font-weight: 800; color: #1e1b4b; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Next-Gen Security Stack.</h2>
-        <p style="font-size: 1.1rem; color: #4338ca; font-weight: 500; margin: 0;">Upgrade your CTF capabilities instantly.</p>
-      </div>
-      <div style="font-size: 5rem; color: #6366f1; opacity: 0.2;">
-        <i class="fa-solid fa-server"></i>
+        <strong style="font-size: 1.05rem;">Flag Captured: Cross-Site Scripting (XSS) successful!</strong><br>
+        <span style="font-family: monospace; background: rgba(255,255,255,0.7); padding: 4px 8px; border-radius: 6px; margin-top: 0.75rem; display: inline-block; font-size: 0.9rem; border: 1px solid #bbf7d0;"><%= xss_flag %></span>
       </div>
     </div>
+  <% } %>
 
-    <!-- Product Grid -->
-    <div class="product-grid">
-      
-      <!-- Product 1: Threat Intel -->
-      <div class="product-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div class="product-icon" style="background: #f3f4f6; color: #4b5563;"><i class="fa-solid fa-satellite-dish"></i></div>
-          <span style="background: #f3f4f6; color: #4b5563; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">STANDARD</span>
-        </div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">Threat Intel API</h3>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Real-time feed of known malicious IPs and vulnerability signatures.</p>
-        <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
-          <span style="font-size: 1.5rem; font-weight: 800; color: #111827;">$49</span><span style="color: #9ca3af; font-size: 0.9rem;">/mo</span>
-        </div>
-        <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
-      </div>
+  <% if (typeof review_q !== 'undefined' && review_q) { %>
+    <p style="margin-bottom: 2rem; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; color: #475569;">Showing review results for: <strong style="color: #0f172a;"><%- review_q %></strong></p>
+  <% } %>
 
-      <!-- Product 2: WAF -->
-      <div class="product-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div class="product-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-shield-halved"></i></div>
-          <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">SAVE 20%</span>
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <div style="padding-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
+        <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 1rem;">
+          Enterprise Master Key 
+          <span style="color: #f59e0b; font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
         </div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">Advanced WAF</h3>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Enterprise-grade web application firewall to protect against top OWASP threats.</p>
-        <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
-          <span style="font-size: 1.5rem; font-weight: 800; color: #111827;">$199</span>
-          <span style="text-decoration: line-through; color: #9ca3af; font-size: 0.9rem;">$249</span>
-        </div>
-        <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
+        <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">2 days ago</div>
       </div>
-
-      <!-- Product 3: Zero-Day Sandbox -->
-      <div class="product-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div class="product-icon" style="background: #fef2f2; color: #ef4444;"><i class="fa-solid fa-bug"></i></div>
-          <span style="background: #fef2f2; color: #dc2626; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">HOT</span>
-        </div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #111827;">0-Day Sandbox</h3>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Isolated detonation environment for executing and analyzing untrusted binaries.</p>
-        <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
-          <span style="font-size: 1.5rem; font-weight: 800; color: #111827;">$299</span><span style="color: #9ca3af; font-size: 0.9rem;">/mo</span>
-        </div>
-        <button class="btn" style="width: 100%; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; border-radius: 8px;" onclick="alert('Demo item: Insufficient permissions')">Add to Workspace</button>
-      </div>
-      
-      <!-- CTF Product (Real Purchase) -->
-      <div class="product-card" style="background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); border: 1px solid #fde68a; box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div class="product-icon" style="background: #fef3c7; color: #d97706; box-shadow: 0 4px 10px rgba(217,119,6,0.2);"><i class="fa-solid fa-key"></i></div>
-          <span style="background: #d97706; color: white; font-size: 0.75rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.05em;">VIP EXCLUSIVE</span>
-        </div>
-        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #92400e;">Enterprise Master Key</h3>
-        <p style="color: #b45309; font-size: 0.9rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.5;">Target objective. Unlock full system access to capture the final flag.</p>
-        <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
-          <span style="font-size: 1.5rem; font-weight: 800; color: #92400e;">$500</span>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; background: #d97706; font-weight: 700; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(217,119,6,0.3);" onclick="buyFlag()">Acquire Key</button>
-      </div>
+      <p style="color: #475569; font-size: 0.95rem; margin: 0;">Too expensive for a regular user, but a must-have if you're trying to win the CTF. Absolutely essential.</p>
     </div>
-
-    <!-- Reviews Section -->
-    <div class="reviews-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="font-size: 1.25rem; font-weight: 800; color: #111827; margin: 0;"><i class="fa-solid fa-comments" style="color: #9ca3af; margin-right: 0.5rem;"></i> Product Reviews</h2>
-        <form action="/store" method="GET" style="display: flex; gap: 8px;">
-          <input type="text" name="review_q" placeholder="Search reviews..." value="<%= typeof review_q !== 'undefined' && review_q ? review_q : '' %>" style="padding: 0.5rem 1rem; font-size: 0.9rem; border: 1px solid #d1d5db; border-radius: 8px; outline: none; min-width: 200px;">
-          <button class="btn" style="background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 8px;">Search</button>
-        </form>
+    
+    <div style="padding-bottom: 0;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
+        <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 1rem;">
+          Threat Intel API 
+          <span style="color: #f59e0b; font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span>
+        </div>
+        <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">1 week ago</div>
       </div>
-
-      <% if (typeof xss_flag !== 'undefined' && xss_flag) { %>
-        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: flex-start;">
-          <i class="fa-solid fa-flag" style="margin-top: 4px; font-size: 1.2rem;"></i>
-          <div>
-            <strong style="font-size: 1.05rem;">Flag Captured: Cross-Site Scripting (XSS) successful!</strong><br>
-            <span style="font-family: monospace; background: rgba(255,255,255,0.7); padding: 4px 8px; border-radius: 6px; margin-top: 0.75rem; display: inline-block; font-size: 0.9rem; border: 1px solid #bbf7d0;"><%= xss_flag %></span>
-          </div>
-        </div>
-      <% } %>
-
-      <% if (typeof review_q !== 'undefined' && review_q) { %>
-        <p style="margin-bottom: 2rem; padding: 1rem 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; color: #475569;">Showing review results for: <strong style="color: #0f172a;"><%- review_q %></strong></p>
-      <% } %>
-
-      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <div style="padding-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
-            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 1rem;">
-              Enterprise Master Key 
-              <span style="color: #f59e0b; font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
-            </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">2 days ago</div>
-          </div>
-          <p style="color: #475569; font-size: 0.95rem; margin: 0;">Too expensive for a regular user, but a must-have if you're trying to win the CTF. Absolutely essential.</p>
-        </div>
-        
-        <div style="padding-bottom: 0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
-            <div style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 1rem;">
-              Threat Intel API 
-              <span style="color: #f59e0b; font-size: 0.8rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span>
-            </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">1 week ago</div>
-          </div>
-          <p style="color: #475569; font-size: 0.95rem; margin: 0;">Great latency, but I keep getting logged out due to the strict session management. 4/5 stars.</p>
-        </div>
-      </div>
+      <p style="color: #475569; font-size: 0.95rem; margin: 0;">Great latency, but I keep getting logged out due to the strict session management. 4/5 stars.</p>
     </div>
   </div>
 </div>
