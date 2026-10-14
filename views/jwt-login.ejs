@@ -29,7 +29,7 @@
       <h2><i class="fa-solid fa-ticket"></i> Your Access Token</h2>
     </div>
     <div class="token-display"><%= token %></div>
-    <p style="font-size:.85rem;color:var(--text-secondary)">Use this token to access protected endpoints. <a href="/jwt/admin">Access Security Operations &rarr;</a></p>
+    <p style="font-size:.85rem;color:var(--text-secondary)">Use this token to access protected endpoints. <a href="/jwt/admin?token=<%= encodeURIComponent(token) %>">Access Security Operations &rarr;</a></p>
   </div>
 <% } %>
 

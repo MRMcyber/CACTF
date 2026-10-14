@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../lib/router')();
 const { query } = require('../db/database');
 
 // GET /store - Marketplace & Upgrades
@@ -14,7 +13,7 @@ router.get('/', async (req, res) => {
     
     let xss_flag = null;
     const review_q = req.query.review_q || '';
-    if (review_q.includes('<script>') || review_q.includes('onerror=')) {
+    if (/<script\b|\bon\w+\s*=/i.test(review_q)) {
         xss_flag = 'flag{857391}';
     }
 
@@ -24,6 +23,7 @@ router.get('/', async (req, res) => {
       balance: balance,
       review_q: review_q,
       xss_flag: xss_flag,
+      purchase_flag: req.session.purchase_flag || null,
       message: null,
       error: null
     });

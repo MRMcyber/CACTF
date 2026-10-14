@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../lib/router')();
 const { query } = require('../db/database');
 
 // GET /transfer - Fund transfer form
@@ -28,9 +27,9 @@ router.post('/', async (req, res) => {
   }
 
   const { recipient, amount } = req.body;
-  const transferAmount = parseFloat(amount);
+  const transferAmount = Number(amount);
 
-  if (!recipient || isNaN(transferAmount) || transferAmount === 0) {
+  if (!recipient || !Number.isFinite(transferAmount) || transferAmount === 0) {
     const rows = await query('SELECT balance FROM users WHERE id = $1', [req.session.user.id]);
     const user = rows.length > 0 ? rows[0] : null;
     return res.render('transfer', {
@@ -66,6 +65,13 @@ router.post('/', async (req, res) => {
     });
   }
 
+  if (recv.id === sender.id) {
+    return res.status(400).render('transfer', {
+      title: 'Fund Transfer', user: req.session.user, message: null,
+      error: 'Choose a different recipient.', balance: sender.balance, flag: null
+    });
+  }
+
   if (sender.balance < transferAmount) {
     return res.render('transfer', {
       title: 'Fund Transfer',
@@ -77,19 +83,30 @@ router.post('/', async (req, res) => {
     });
   }
 
-  // Perform transfer
-  await query('UPDATE users SET balance = balance - $1 WHERE id = $2', [transferAmount, sender.id]);
-  await query('UPDATE users SET balance = balance + $1 WHERE id = $2', [transferAmount, recv.id]);
+  // Lock both accounts in a consistent order and apply both changes atomically.
+  // Negative amounts remain intentionally accepted for the CTF challenge.
+  const updated = await query(`
+    WITH participants AS MATERIALIZED (
+      SELECT id, balance FROM users WHERE id IN ($2, $3) ORDER BY id FOR UPDATE
+    ), eligible AS (
+      SELECT COUNT(*) AS count FROM participants
+      HAVING COUNT(*) = 2 AND MAX(CASE WHEN id = $2 THEN balance END) >= $1
+    )
+    UPDATE users SET balance = users.balance + CASE WHEN users.id = $2 THEN -$1 ELSE $1 END
+    FROM participants WHERE users.id = participants.id AND EXISTS (SELECT 1 FROM eligible)
+    RETURNING users.id, users.balance
+  `, [transferAmount, sender.id, recv.id]);
+  const updatedSender = updated.find(user => user.id === sender.id);
+  if (!updatedSender) {
+    return res.status(400).render('transfer', {
+      title: 'Fund Transfer', user: req.session.user, message: null,
+      error: 'Insufficient balance or recipient unavailable.', balance: sender.balance, flag: null
+    });
+  }
 
-  const updatedSenderRows = await query('SELECT balance FROM users WHERE id = $1', [sender.id]);
-  const updatedRecvRows = await query('SELECT balance FROM users WHERE id = $1', [recv.id]);
-
-  const updatedSender = updatedSenderRows[0];
-  const updatedRecv = updatedRecvRows[0];
-
-  // Flag condition: if recipient's balance exceeds 5000 after transfer
+  // The challenge is triggered by the amount sent, regardless of prior balances.
   let flag = null;
-  if (updatedRecv.balance > 5000) {
+  if (transferAmount > 5000) {
     flag = 'flag{294851}';
   }
   

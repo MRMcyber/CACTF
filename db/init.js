@@ -10,10 +10,6 @@ const path = require('path');
 const fs = require('fs');
 
 async function initDatabase() {
-  // Drop old tables to force schema update
-  await query('DROP TABLE IF EXISTS users CASCADE');
-  await query('DROP TABLE IF EXISTS flags CASCADE');
-
   // Create tables
   await query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -42,12 +38,10 @@ async function initDatabase() {
   `);
 
   // Clear existing data (for re-seeding)
-  await query('DELETE FROM users');
-  await query('DELETE FROM flags');
-
-  // Reset sequences
-  await query("ALTER SEQUENCE users_id_seq RESTART WITH 1");
-  await query("ALTER SEQUENCE flags_id_seq RESTART WITH 1");
+  // Explicit reset for seeding; keep runtime foreign keys intact.
+  await query('TRUNCATE TABLE users, flags RESTART IDENTITY CASCADE');
+  await query('CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, data JSONB NOT NULL, expires_at TIMESTAMPTZ NOT NULL)');
+  await query('DELETE FROM sessions');
 
   // Insert admin user
   await query(

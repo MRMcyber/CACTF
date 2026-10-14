@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Auto-dismiss alerts
   document.querySelectorAll('.alert').forEach(function(el) {
+    if (el.hasAttribute('data-persistent')) return;
     setTimeout(function() {
       el.style.transition = 'opacity .3s ease';
       el.style.opacity = '0';

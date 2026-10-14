@@ -90,7 +90,7 @@
     <div style="position: relative; z-index: 2;">
       <div style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Workspace Wallet</div>
       <div style="font-weight: 800; font-size: 2.25rem; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 0.75rem; line-height: 1;">
-        $<%= typeof balance !== 'undefined' ? (typeof balance === 'number' ? balance.toFixed(2) : parseFloat(balance).toFixed(2)) : '0.00' %>
+        <span id="walletBalance">$<%= typeof balance !== 'undefined' ? (typeof balance === 'number' ? balance.toFixed(2) : parseFloat(balance).toFixed(2)) : '0.00' %></span>
         <span style="font-size: 0.8rem; font-weight: 600; color: #10b981; background: rgba(16,185,129,0.15); padding: 4px 10px; border-radius: 99px; letter-spacing: 0; transform: translateY(-4px);">Available</span>
       </div>
     </div>
@@ -105,12 +105,14 @@
     </div>
     <div style="display: flex; gap: 8px; flex-grow: 1;">
       <input type="text" id="promoCode" placeholder="e.g. WELCOME10" style="flex: 1; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; min-width: 0;">
-      <button onclick="redeemPromo()" class="btn btn-primary" style="border-radius: 8px; padding: 0.6rem 1.25rem; font-weight: 600; flex-shrink: 0;">Apply</button>
+      <button id="redeemButton" onclick="redeemPromo()" class="btn btn-primary" style="border-radius: 8px; padding: 0.6rem 1.25rem; font-weight: 600; flex-shrink: 0;">Apply</button>
     </div>
   </div>
 </div>
 
 <!-- Full-Width Hero Banner -->
+<div id="storeResult" class="alert alert-success" data-persistent role="status" style="display:<%= purchase_flag ? 'block' : 'none' %>; white-space:pre-wrap;"><%= purchase_flag ? 'Enterprise Master Key purchased! Flag: ' + purchase_flag : '' %></div>
+
 <div class="hero-banner">
   <div>
     <div style="background: #c7d2fe; color: #4338ca; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; display: inline-block; margin-bottom: 1rem;">Q4 RELEASE</div>
@@ -179,7 +181,7 @@
     <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.5rem;">
       <span style="font-size: 1.75rem; font-weight: 800; color: #92400e;">$500</span>
     </div>
-    <button class="btn btn-primary" style="width: 100%; background: #d97706; font-weight: 700; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(217,119,6,0.3);" onclick="buyFlag()">Acquire Key</button>
+    <button id="purchaseButton" class="btn btn-primary" style="width: 100%; background: #d97706; font-weight: 700; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(217,119,6,0.3);" onclick="buyFlag()">Acquire Key</button>
   </div>
 </div>
 
@@ -233,43 +235,46 @@
 </div>
 
 <script>
+  function showStoreResult(data, ok) {
+    const result = document.getElementById('storeResult');
+    result.className = 'alert ' + (ok ? 'alert-success' : 'alert-error');
+    result.style.display = 'block';
+    result.textContent = ok ? data.message + (data.flag ? '\nFlag: ' + data.flag : '') : (data.error || 'Request failed. Please try again.');
+    if (typeof data.balance === 'number') document.getElementById('walletBalance').textContent = '$' + data.balance.toFixed(2);
+  }
+
   async function redeemPromo() {
-    const code = document.getElementById('promoCode').value;
-    if(!code) return alert('Enter a promo code');
+    const code = document.getElementById('promoCode').value.trim();
+    if(!code) return showStoreResult({ error: 'Enter a promo code.' }, false);
+    const button = document.getElementById('redeemButton');
+    button.disabled = true;
     try {
-      const res = await fetch('/api/promo', {
+      const res = await fetch('/api/promo/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
       });
       const data = await res.json();
-      if(res.ok) {
-        alert('Success: ' + data.message);
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
+      showStoreResult(data, res.ok);
     } catch(err) {
-      alert('Error redeeming promo code');
-    }
+      showStoreResult({ error: 'Error redeeming promo code. Please try again.' }, false);
+    } finally { button.disabled = false; }
   }
 
   async function buyFlag() {
     if (!confirm('Confirm purchase of Enterprise Master Key for $500.00?')) return;
+    const button = document.getElementById('purchaseButton');
+    button.disabled = true;
     
     try {
-      const res = await fetch('/api/buy-flag', {
+      const res = await fetch('/api/store/buy-flag', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await res.json();
-      if(res.ok) {
-        alert('Success: ' + data.message + '\nFlag: ' + data.flag);
-      } else {
-        alert('Error: ' + data.error);
-      }
+      showStoreResult(data, res.ok);
     } catch(err) {
-      alert('Error purchasing flag');
-    }
+      showStoreResult({ error: 'Error purchasing flag. Please try again.' }, false);
+    } finally { button.disabled = false; }
   }
 </script>

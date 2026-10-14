@@ -4,9 +4,14 @@ const cookieParser = require('cookie-parser');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const { query } = require('./db/database');
+const PostgresSessionStore = require('./db/session-store');
+const { ensureRuntimeSchema } = require('./db/schema');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.locals.user = null;
+app.locals.message = null;
+app.locals.error = null;
 
 // View engine
 app.set('view engine', 'ejs');
@@ -29,10 +34,11 @@ app.use(cookieParser());
 
 // Session config (intentionally insecure for CSRF challenge)
 app.use(session({
+  store: new PostgresSessionStore(),
   secret: 'ctf-insecure-session-secret',
   resave: false,
-  saveUninitialized: true,
-  cookie: { httpOnly: false, secure: false, sameSite: false }
+  saveUninitialized: false,
+  cookie: { httpOnly: false, secure: false, sameSite: false, maxAge: 86400000 }
 }));
 
 // Static files
@@ -108,64 +114,80 @@ function buildChallenges(foundFlags) {
 }
 
 // ── Flag Submission (GET) ──
-app.get('/submit-flag', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
+app.get('/submit-flag', async (req, res, next) => {
+  try {
+    if (!req.session.user) return res.redirect('/login');
 
-  const foundFlags = req.session.foundFlags || [];
-  const challenges = buildChallenges(foundFlags);
-  const totalScore = challenges.filter(c => c.found).reduce((s, c) => s + c.points, 0);
+    const foundFlags = (await query('SELECT challenge FROM user_flags WHERE user_id = $1', [req.session.user.id])).map(row => row.challenge);
+    const challenges = buildChallenges(foundFlags);
+    const totalScore = challenges.filter(c => c.found).reduce((s, c) => s + c.points, 0);
 
-  res.render('scoreboard', {
-    title: 'Flag Submission',
-    user: req.session.user,
-    message: null,
-    error: null,
-    challenges,
-    totalScore,
-    maxScore: 150
-  });
+    res.render('scoreboard', {
+      title: 'Flag Submission',
+      user: req.session.user,
+      message: null,
+      error: null,
+      challenges,
+      totalScore,
+      maxScore: challenges.reduce((sum, challenge) => sum + challenge.points, 0)
+    });
+  } catch (error) { next(error); }
 });
 
 // ── Flag Submission (POST) ──
-app.post('/submit-flag', async (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
+app.post('/submit-flag', async (req, res, next) => {
+  try {
+    if (!req.session.user) return res.redirect('/login');
 
-  const { flag } = req.body;
-  const flags = await query('SELECT challenge, flag, points FROM flags');
+    const flag = typeof req.body.flag === 'string' ? req.body.flag.trim() : '';
+    const flags = await query('SELECT challenge, flag, points FROM flags');
 
-  if (!req.session.foundFlags) req.session.foundFlags = [];
+    const matched = flags.find(f => f.flag === (flag || '').trim());
+    let message = null, error = null;
 
-  const matched = flags.find(f => f.flag === (flag || '').trim());
-  let message = null, error = null;
-
-  if (matched) {
-    if (req.session.foundFlags.includes(matched.challenge)) {
-      message = `You've already captured this flag! (+0 pts)`;
+    if (matched) {
+      const captured = await query(
+        'INSERT INTO user_flags (user_id, challenge) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING challenge',
+        [req.session.user.id, matched.challenge]
+      );
+      if (!captured.length) {
+        message = `You've already captured this flag! (+0 pts)`;
+      } else {
+        message = `🎉 Flag accepted! +${matched.points} points!`;
+      }
     } else {
-      req.session.foundFlags.push(matched.challenge);
-      message = `🎉 Flag accepted! +${matched.points} points!`;
+      error = 'Invalid flag. Keep looking!';
     }
-  } else {
-    error = 'Invalid flag. Keep looking!';
-  }
 
-  const foundFlags = req.session.foundFlags;
-  const challenges = buildChallenges(foundFlags);
-  const totalScore = challenges.filter(c => c.found).reduce((s, c) => s + c.points, 0);
+    const foundFlags = (await query('SELECT challenge FROM user_flags WHERE user_id = $1', [req.session.user.id])).map(row => row.challenge);
+    const challenges = buildChallenges(foundFlags);
+    const totalScore = challenges.filter(c => c.found).reduce((s, c) => s + c.points, 0);
 
-  res.render('scoreboard', {
-    title: 'Flag Submission',
-    user: req.session.user,
-    message,
-    error,
-    challenges,
-    totalScore,
-    maxScore: 150
-  });
+    res.render('scoreboard', {
+      title: 'Flag Submission',
+      user: req.session.user,
+      message,
+      error,
+      challenges,
+      totalScore,
+      maxScore: challenges.reduce((sum, challenge) => sum + challenge.points, 0)
+    });
+  } catch (error) { next(error); }
+});
+
+app.use((req, res) => res.status(404).send('Page not found'));
+app.use((error, req, res, next) => {
+  console.error('Request failed:', error.message);
+  if (res.headersSent) return next(error);
+  const status = error.status || 500;
+  const message = status < 500 ? error.message : 'Unable to complete this request. Please try again.';
+  if (req.path.startsWith('/api/')) return res.status(status).json({ error: message });
+  res.status(status).render('error', { title: 'Request error', error: message });
 });
 
 // ── Start ──
 async function start() {
+  await ensureRuntimeSchema();
   app.listen(PORT, () => {
     console.log(`\n  CACTF Platform`);
     console.log(`  Running at http://localhost:${PORT}\n`);
@@ -173,7 +195,7 @@ async function start() {
 }
 
 if (require.main === module) {
-  start().catch(console.error);
+  start().catch(error => { console.error(error.message); process.exitCode = 1; });
 }
 
 module.exports = app;

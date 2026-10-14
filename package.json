@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node db/init.js"
+    "seed": "node db/init.js",
+    "migrate": "node db/schema.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
+    "verify": "node scripts/verify.js"
   },
   "keywords": [
     "ctf",
@@ -27,5 +30,8 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.4.0",
     "sql.js": "^1.11.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
   }
 }

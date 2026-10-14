@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../lib/router')();
 
 const VALID_API_KEY = 'sk-ctf-2024-s3cur1ty-k3y-d0nt-sh4r3';
 
@@ -50,13 +49,16 @@ router.get('/download', (req, res) => {
   if (file.includes('.env')) {
     return res.type('text/plain').send(`DATABASE_URL=postgres://neondb_owner:pass@ep-fancy-art.us-east-2.aws.neon.tech/neondb\nAPI_SECRET=flag{384756}\n`);
   }
+  if (file.includes('traversal_flag')) {
+    return res.type('text/plain').send('flag{path_traversal_master_9921}\n');
+  }
   res.type('text/plain').send(`%PDF-1.4\n%Invoice details for CACTF billing.\nFile: ${file}\n`);
 });
 
 // Medium 2: Server-Side Request Forgery (SSRF)
 router.post('/webhook/test', async (req, res) => {
   const { url } = req.body;
-  if (!url) return res.status(400).json({ error: 'URL required' });
+  if (typeof url !== 'string' || !url.trim()) return res.status(400).json({ error: 'URL required' });
   
   // Check for metadata IP simulating AWS environment
   if (url.includes('169.254.169.254')) {
@@ -86,9 +88,9 @@ router.post('/promo/redeem', async (req, res) => {
   try {
     // SIMPLIFIED FOR 1HR CTF: Removed the 'promo_used' state check and race condition delay.
     // Increased payout to $100 so they only have to submit it 5 times.
-    await query('UPDATE users SET balance = balance + 100 WHERE id = $1', [req.session.user.id]);
-
-    res.json({ success: true, message: 'Redeemed $100!' });
+    const rows = await query('UPDATE users SET balance = balance + 100 WHERE id = $1 RETURNING balance', [req.session.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json({ success: true, message: 'Redeemed $100!', balance: rows[0].balance });
   } catch (e) {
     res.status(500).json({ error: 'Database error' });
   }
@@ -97,10 +99,10 @@ router.post('/promo/redeem', async (req, res) => {
 router.post('/store/buy-flag', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'Login required' });
   try {
-    const userRows = await query('SELECT balance FROM users WHERE id = $1', [req.session.user.id]);
-    if (userRows[0].balance >= 500) {
-      await query('UPDATE users SET balance = balance - 500 WHERE id = $1', [req.session.user.id]);
-      res.json({ success: true, flag: 'flag{746352}' });
+    const userRows = await query('UPDATE users SET balance = balance - 500 WHERE id = $1 AND balance >= 500 RETURNING balance', [req.session.user.id]);
+    if (userRows.length) {
+      req.session.purchase_flag = 'flag{746352}';
+      res.json({ success: true, message: 'Enterprise Master Key purchased!', flag: req.session.purchase_flag, balance: userRows[0].balance });
     } else {
       res.status(400).json({ error: 'Insufficient balance. Need $500.' });
     }

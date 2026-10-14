@@ -1,0 +1,42 @@
+Intro to the project: 
+CACTF is an intentionally vulnerable Capture The Flag (CTF) training site designed for beginners, disguised as a sleek modern B2B SaaS / E-commerce platform.
+
+In Brief:
+
+The Cover Story (Frontend & UI):
+
+Looks and behaves like a polished commercial SaaS called CACTF ("The Commerce Platform Built for Scale").
+Features a landing page, user overview dashboard, billing & invoicing, customer directory, API developer portal, and an upgrade store with product reviews and promo codes.
+
+The Real Purpose (CTF Security Lab):
+
+Designed for players to hunt down 15+ realistic web vulnerabilities hidden across normal business features:
+
+Easy (8 bugs – 5 pts each)
+SQL Injection Login Bypass (' OR 1=1--)
+Reflected XSS (Search bar in the store reviews)
+Hardcoded API Key (Leaked in /js/config.js to hit /api/secret)
+Default Admin Credentials (admin / admin login)
+HTML Comment Leak (Source code note on landing page pointing to /assets/backup_flag.txt)
+API Over-fetching (/api/user/session-info leaks hidden debug flag in JSON)
+Negative Transfer Logic Flaw (Sending negative money in /transfer increases balance)
+Robots.txt Recon (Hidden /api/v1/dev-test-flag-endpoint-do-not-index listed in /robots.txt)
+
+Medium (6 bugs – 10 pts each)
+IDOR (Enumerating /api/users/:id/profile to view User 5's SSN/data)
+JWT Token Forgery (Cracking weak secret "secret" to forge an admin role on /jwt/admin)
+Directory Traversal / LFI (/api/download?file=../../.env)
+Avatar Path Traversal (/profile/avatar?f=../../traversal_flag.txt)
+Cloud Metadata SSRF (Sending 169.254.169.254 into the webhook tester)
+Massive Balance Transfer (Transferring > $5,000 to trigger unauthorized session transfer flag)
+
+Hard (2 bugs – 30 pts each)
+Stored XSS Chain (Bio stored script triggering /api/admin/system-diagnostics with header spoofing)
+Infinite Promo Code / Replay Flaw (Repeatedly redeeming WELCOME10 to reach $500 and buy the Master Key)
+
+
+Finding bugs reveals flags (e.g., flag{...}), which players enter into the /submit-flag Scoreboard to track their score and read hints.
+
+there are many bugs in the site, endpoints not work, file upload returning some errors, file profile pic not changed after uploading even some flags are not displayed after finding, I want u to deal with it trouble shoot from the main site cactf.vercel.app and make every confident change that u must make. When you are done make changes to git and to my GitHub acct, you might require my authorization so tell me when you re done. I want but fixed of the ctf locally and on the main site but majorly on the live site 
+
+I'm trusting u to make this right dont fuck it up boy.

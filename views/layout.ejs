@@ -46,7 +46,7 @@
       </div>
       
       <div class="sidebar-user">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+        <img src="<%= typeof avatarUrl !== 'undefined' ? avatarUrl : '/profile/avatar?f=current' %>" alt="Avatar">
         <div>
           <div style="font-weight:700; font-size:1rem;"><%= user.username %></div>
           <div style="font-size:0.75rem; color:#10b981; display:flex; align-items:center; gap:0.3rem;">
@@ -61,6 +61,8 @@
           <a href="/profile" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Dashboard') ? ' active' : '' %>">Overview</a>
           <% if (user && user.role === 'admin') { %>
           <a href="/search" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Customer') ? ' active' : '' %>">Users</a>
+          <a href="/admin/dashboard" class="sidebar-link">Admin Panel</a>
+          <a href="/admin/reports" class="sidebar-link">User Reports</a>
           <% } %>
           <a href="/transfer" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Billing') ? ' active' : '' %>">Earnings</a>
           <a href="/store" class="sidebar-link<%= typeof title !== 'undefined' && title.includes('Marketplace') ? ' active' : '' %>">Store</a>

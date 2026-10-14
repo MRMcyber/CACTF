@@ -5,9 +5,13 @@
  */
 const { neon } = require('@neondatabase/serverless');
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://neondb_owner:npg_aexGUfS8IB3Z@ep-fancy-art-b4fih0j9-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
+const fs = require('fs');
+const path = require('path');
+// Local startup loads the ignored development environment; Vercel injects its own.
+const localEnv = path.join(__dirname, '..', '.env.local');
+if (!process.env.VERCEL && fs.existsSync(localEnv)) process.loadEnvFile(localEnv);
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) throw new Error('DATABASE_URL is required. Configure .env.local or your deployment environment.');
 
 const sql = neon(DATABASE_URL);
 

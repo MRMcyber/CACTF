@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('../lib/router')();
 const { query } = require('../db/database');
 
 // GET /admin/dashboard - Administration panel
