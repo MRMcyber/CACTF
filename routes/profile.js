@@ -72,7 +72,7 @@ router.post('/update', async (req, res) => {
 router.get('/avatar', async (req, res) => {
   const file = req.query.f || 'default.png';
   if (typeof file !== 'string') return res.status(400).send('Invalid avatar filename');
-  if (req.session.user && !file.includes('..') && file !== 'default.png') {
+  if (req.session.user && file !== 'default.png' && !file.startsWith('..')) {
     const avatars = await query(
       "SELECT mime_type, encode(data, 'base64') AS data FROM user_avatars WHERE user_id = $1 AND ($2 = 'current' OR filename = $2)",
       [req.session.user.id, file]

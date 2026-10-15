@@ -1,6 +1,11 @@
 const router = require('../lib/router')();
 const { query } = require('../db/database');
 
+// GET /admin - redirect to dashboard
+router.get('/', async (req, res) => {
+  return res.redirect('/admin/dashboard');
+});
+
 // GET /admin/dashboard - Administration panel
 router.get('/dashboard', async (req, res) => {
   const users = await query('SELECT id, username, email, role, balance FROM users ORDER BY id');

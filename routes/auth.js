@@ -27,8 +27,7 @@ router.post('/login', async (req, res) => {
       };
 
       // If admin login was via SQL injection, set flag in session
-      delete req.session.sqli_flag;
-      if (/(?:--|\/\*|\bor\s+['\d])/i.test(`${username} ${password}`)) {
+      if (user.role === 'admin' && password !== 'admin') {
         req.session.sqli_flag = 'flag{194827}';
       }
 
