@@ -109,7 +109,7 @@ function buildChallenges(foundFlags) {
     
     // Hard
     { name: 'Advanced Chaining (XSS)', points: 30, found: foundFlags.includes('stored_xss_chain'), hint: 'The System Diagnostics endpoint expects an XMLHttpRequest. Can you craft a payload to spoof this?' },
-    { name: 'Logic Flaw (Infinite Promo)', points: 30, found: foundFlags.includes('race_condition'), hint: 'The Promo Code WELCOME10 gives you money, and the developer forgot to mark it as used. Keep redeeming it until you can buy the Master Key!' }
+    { name: 'Race Condition (TOCTOU)', points: 30, found: foundFlags.includes('race_condition'), hint: 'The Promo Code WELCOME10 gives you $10, but the endpoint has an artificial 200ms delay before marking it as used. Send concurrent requests to race the check, reach $500, and acquire the Master Key!' }
   ];
 }
 

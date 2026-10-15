@@ -77,7 +77,7 @@ router.post('/webhook/test', async (req, res) => {
   }
 });
 
-// Simplified Hard: Logic Flaw (Replay Attack)
+// Flag 9: Race Condition (TOCTOU)
 const { query } = require('../db/database');
 
 router.post('/promo/redeem', async (req, res) => {
@@ -86,11 +86,20 @@ router.post('/promo/redeem', async (req, res) => {
   if (code !== 'WELCOME10') return res.status(400).json({ error: 'Invalid code' });
   
   try {
-    // SIMPLIFIED FOR 1HR CTF: Removed the 'promo_used' state check and race condition delay.
-    // Increased payout to $100 so they only have to submit it 5 times.
-    const rows = await query('UPDATE users SET balance = balance + 100 WHERE id = $1 RETURNING balance', [req.session.user.id]);
-    if (!rows.length) return res.status(404).json({ error: 'User not found' });
-    res.json({ success: true, message: 'Redeemed $100!', balance: rows[0].balance });
+    // 1. Time-of-Check (TOC): verify user has not already used the promo code
+    const userRows = await query('SELECT promo_used, balance FROM users WHERE id = $1', [req.session.user.id]);
+    if (!userRows.length) return res.status(404).json({ error: 'User not found' });
+    
+    if (userRows[0].promo_used) {
+      return res.status(400).json({ error: 'Promo code has already been redeemed' });
+    }
+
+    // Vulnerability: Artificial 200ms delay between check and update introduces TOCTOU race window
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // 2. Time-of-Use (TOU): Increment balance by $10 and set promo_used flag
+    const rows = await query('UPDATE users SET balance = balance + 10, promo_used = TRUE WHERE id = $1 RETURNING balance', [req.session.user.id]);
+    res.json({ success: true, message: 'Redeemed $10!', balance: rows[0].balance });
   } catch (e) {
     res.status(500).json({ error: 'Database error' });
   }

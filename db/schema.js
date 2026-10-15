@@ -19,6 +19,7 @@ function ensureRuntimeSchema() {
         captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         PRIMARY KEY (user_id, challenge)
       )`);
+      await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS promo_used BOOLEAN DEFAULT FALSE');
     })().catch(error => { initialization = null; throw error; });
   }
   return initialization;
