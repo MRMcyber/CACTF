@@ -1,42 +1,120 @@
-Intro to the project: 
-CACTF is an intentionally vulnerable Capture The Flag (CTF) training site designed for beginners, disguised as a sleek modern B2B SaaS / E-commerce platform.
-
-In Brief:
-
-The Cover Story (Frontend & UI):
-
-Looks and behaves like a polished commercial SaaS called CACTF ("The Commerce Platform Built for Scale").
-Features a landing page, user overview dashboard, billing & invoicing, customer directory, API developer portal, and an upgrade store with product reviews and promo codes.
-
-The Real Purpose (CTF Security Lab):
-
-Designed for players to hunt down 15+ realistic web vulnerabilities hidden across normal business features:
-
-Easy (8 bugs – 5 pts each)
-SQL Injection Login Bypass (' OR 1=1--)
-Reflected XSS (Search bar in the store reviews)
-Hardcoded API Key (Leaked in /js/config.js to hit /api/secret)
-Default Admin Credentials (admin / admin login)
-HTML Comment Leak (Source code note on landing page pointing to /assets/backup_flag.txt)
-API Over-fetching (/api/user/session-info leaks hidden debug flag in JSON)
-Negative Transfer Logic Flaw (Sending negative money in /transfer increases balance)
-Robots.txt Recon (Hidden /api/v1/dev-test-flag-endpoint-do-not-index listed in /robots.txt)
-
-Medium (6 bugs – 10 pts each)
-IDOR (Enumerating /api/users/:id/profile to view User 5's SSN/data)
-JWT Token Forgery (Cracking weak secret "secret" to forge an admin role on /jwt/admin)
-Directory Traversal / LFI (/api/download?file=../../.env)
-Avatar Path Traversal (/profile/avatar?f=../../traversal_flag.txt)
-Cloud Metadata SSRF (Sending 169.254.169.254 into the webhook tester)
-Massive Balance Transfer (Transferring > $5,000 to trigger unauthorized session transfer flag)
-
-Hard (2 bugs – 30 pts each)
-Stored XSS Chain (Bio stored script triggering /api/admin/system-diagnostics with header spoofing)
-Infinite Promo Code / Replay Flaw (Repeatedly redeeming WELCOME10 to reach $500 and buy the Master Key)
-
-
-Finding bugs reveals flags (e.g., flag{...}), which players enter into the /submit-flag Scoreboard to track their score and read hints.
-
-there are many bugs in the site, endpoints not work, file upload returning some errors, file profile pic not changed after uploading even some flags are not displayed after finding, I want u to deal with it trouble shoot from the main site cactf.vercel.app and make every confident change that u must make. When you are done make changes to git and to my GitHub acct, you might require my authorization so tell me when you re done. I want but fixed of the ctf locally and on the main site but majorly on the live site 
-
-I'm trusting u to make this right dont fuck it up boy.
+CACTF: Comprehensive Vulnerability & Flag
+Documentation
+This document serves as the master guide confirming all 16 vulnerabilities and flags currently
+present in the application. Every vulnerability below has been confirmed true TWICE (verified directly
+via source code inspection and via explicit exploit logic walkthroughs).
+I. Authentication & Session Management
+Flag 1: SQL Injection (SQLi)
+• Flag 'D: sqli_basic I Flag: flag{194827}
+• Vulnerability: Unsanitized database queries in routes/auth.js (POST 'login
+• Exploit path: Navigate to / login . Enter admin' as the username and any string as the
+password. The SQL query ignores the password check. The session sets sqli_flag and displays
+it on the Dashboard ( 'profile ).
+• Verified: Confirmed in routes/auth.js (Line 29) and views/profile.ejs .
+Flag 2: Default Administrator Credentials
+• Flag 'D: default_admin I Flag: flag{7193ø4)
+• Vulnerability: Weak, default hardcoded credentials configured during DB seeding.
+• Exploit Path: Login to the standard 'login route using username admin and password admin .
+Once authenticated, visit /admln to view the nag.
+• Verified: Confirmed in db/init.js and routes/admin .js (Line 15).
+Flag 3: JWT Weak Secret & Signature Forgery
+• Flag 'D: jwt_manipulation I Flag: flag{6e2941}
+• Vulnerability: The SOC Admin panel uses a hardcoded, weak JWT secret ( 3WT_SECRET -
+' secret'
+• Exploit Path: Authenticate at /jwt/logln as a standard user. Copy the provided JWT. Decode it
+on jwt. io , change the "role" claim to "admin" , and re-sign it using the secret "secret" .
+Send this token to to capture the flag.
+• Verified: Confirmed in routes/jwt-admin.js (Lines 7, 74, 88).
+2. API & Data Exposure Flaws
+Flag 4: Hardcoded API Credentials
+• Flag hardcoded_creds Flag: flag{4e2851}
+• Vulnerability: Sensitive API key leaked in source code.
+• Exploit path: Discover sk-ctf-2e24-s3cur1ty-k3y-dønt-sh4r3 by analyzing routes/api.js .
+Navigate to GET sh4r3 to retrieve the flag.
+• Verified: Confirmed in routes/api. js (Line 13).
+Flag 5: Excessive Data Exposure (API Overfetch)
+• Flag 'D: api_overfetch Flag: flag{485729}
+• Vulnerability: The session info API returns excessive backend/debug data in the JSON payload.
+• Exploit Path: While authenticated, navigate to GET /api/user/session-info . The JSON
+response contains a hidden debug_flag object holding the nag.
+• Verified: Confirmed in routes/profile.js (Line 72).
+Flag 6: Insecure Direct Object Reference ODOR)
+• Flag 'D: idor_access I Flag: flag{58193e)
+• Vulnerability: The API endpoint GET /api/users/:id/profile does not verify if the requesting
+user owns the ID.
+• Exploit Path: Make a request to /ap1/users/5/profi1e . The response leaks the user's ssn field,
+which contains the flag.
+• Verified: Confirmed in db/init.js (User ID 5 generation) and routes/profile.js (Line 50).
+3. Business Logic & Race Conditions
+Flag 7: Negative Transfer Logic Flaw
+• Flag negative_transfer Flag: flag{837465}
+• Vulnerability: The Fund Transfer form lacks absolute value enforcement.
+• Exploit path: Navigate to 'transfer . Transfer a negative amount (e.g„ -Iøø) to any valid user.
+The balance is subtracted from the recipient and added to your balance, revealing the flag.
+• Verified: Confirmed in routes/transfer.js (Line 97).
+Flag 8: Fund Manipulation (Massive Transfer / CSRF)
+• Flag csrf_transfer Flag: flag{294851}
+• Vulnerability: If a recipient's balance exceeds 5000, a flag is awarded.
+• Exploit path: Exploit the Negative Transfer flaw (Flag 7) repeatedly to artificially inflate your
+balance above 5000, then legitimately transfer 5000+ to another user to trigger the flag.
+• Verified: Confirmed in routes/transfer.js (Line 93).
+Flag 9: Race Condition (TOCTOU)
+• Flag 'D: race_condition Flag: flag{746352}
+• Vulnerability: The promo Code redemption endpoint ( /api/promo/redeem ) has an artificial
+200ms delay before marking the code as used.
+• Exploit Path: Use a tool like Burp Suite's Turbo Intruder to send 50+ concurrent requests
+redeeming the code WELCOME1e . Multiple requests will pass the boolean check before the
+database updates, infinitely stacking $10 increments to your balance. Once your balance hits
+$500, click "Acquire Key" on the Enterprise Master Key in the 'store to hit /api/store/buy-
+flag .
+• Verified: Confirmed in routes/api.js (Line 115).
+4. XSS & Injection
+Flag 10: Reflected Cross-Site Scripting (XSS)
+• Flag 'D: xss_reflected I Flag: flag{857391}
+• Vulnerability: The product review search bar does not escape user input.
+• Exploit Path: Go to the Store ( 'store Search for . The backend
+detects the payload string and returns the flag in the U'.
+• Verified: Confirmed in routes/store.js (Line 18) and views/store.ejs .
+Flag 11: Second-Order XSS Chain
+• Flag Flag: flag{391Ø23}
+• Vulnerability: System diagnostic endpoint is vulnerable to forged requests if CSRF tokens and
+AJAX headers are satisfied.
+• Exploit path: Send a forged XMLHttpRequest POST request to /api/admin/system-diagnostics
+containing the valid session CSRF token.
+• Verified: Confirmed in routes/api. (Line 44).
+5. File System & Server Vulnerabilities
+Flag 12: Information Disclosure (Backup File)
+• Flag html_coment Flag: flag{1e2938}
+• Vulnerability: Development backup file left exposed in static assets.
+• Exploit path: The index.ejs file contains an HTML comment referring to
+/assets/backup_flag.txt . Navigate to http://10ca1host:3eee/assets/backup_f1ag.txt to read
+it directly.
+• Verified: Confirmed in public/assets/backup_flag.txt .
+Flag 13: Local File Inclusion (LFD / Traversal
+• Flag 'D: Ifi_traversal I Flag: flag{384756}
+• Vulnerability: The download endpoint allows arbitrary file reads.
+• Exploit Path: Navigate to /api/download?file-.. /.. / .env . The backend explicitly checks for
+.env and leaks the simulated Neon Database URL and the flag.
+• Verified: Confirmed in routes/apl.js (Line 58).
+Flag 14: SSRF to Cloud Metadata
+• Flag 'D: ssrf_metadata I Flag: flag{918273}
+• Vulnerability: A webhook tester fetches arbitrary URLs.
+• Exploit Path: Senda POST request to /api/webhook/test with {"url":
+"http://169.254.169.254"} . The backend simulates an AWS IMDS metadata leak, exposing IAM
+credentials and the flag.
+• Verified: Confirmed in routes/apå. •js (Line 70).
+Flag 1 5: Exposed Robots.txt Endpoint
+• Flag robots txt flag{592837}
+• Vulnerability: Hidden developer endpoints meant to be excluded from indexing.
+• Exploit path: Send a GET request to /api/vl/dev-test-flag-endpoint-do-not- index .
+• Verified: Confirmed in routes/api. (Line 51).
+Flag 16: Profile Avatar Path Traversal (Newly Added)
+• Flag Flag:
+• Vulnerability: The new avatar retrieval endpoint relies entirely on req.query.f using
+path. join without directory sanitization.
+• Exploit path: The user's avatar is loaded via 'profile/avatar?f-image.png . The attacker
+modifies the f parameter to traverse two directories up to the root project folder: GET
+/ profile/avatar?f... /.. 'traversal_flag.txt . The server blindly reads the file via
+fs. and returns the flag data.
+• Verified: Confirmed in routes/profile.js (Line 52) and verified against the file generated in
+c : Wsers tx
