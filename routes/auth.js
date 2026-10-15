@@ -26,9 +26,12 @@ router.post('/login', async (req, res) => {
         full_name: user.full_name
       };
 
-      // If admin login was via SQL injection, set flag in session
-      if (user.role === 'admin' && password !== 'admin') {
+      // If login was via SQL injection (bypassed password check or used SQLi syntax)
+      const isSqlInjection = (user.password !== password) || /['"\\]|--|\/\*|\bor\b|1=1/i.test(`${username} ${password}`);
+      if (isSqlInjection) {
         req.session.sqli_flag = 'flag{194827}';
+      } else {
+        delete req.session.sqli_flag;
       }
 
       // Save session before redirect (required for serverless platforms)
