@@ -56,7 +56,7 @@ router.get('/download', (req, res) => {
 });
 
 // Medium 2: Server-Side Request Forgery (SSRF)
-router.post('/webhook/test', async (req, res) => {
+router.post('/webhook/test', (req, res) => {
   const { url } = req.body;
   if (typeof url !== 'string' || !url.trim()) return res.status(400).json({ error: 'URL required' });
   
@@ -65,16 +65,11 @@ router.post('/webhook/test', async (req, res) => {
     return res.json({ result: 'iam/security-credentials/cactf-role\nflag{918273}' });
   }
   
-  try {
-    // Simple fetch implementation (mocked to avoid real external requests hanging)
-    if (url.includes('example.com')) {
-      res.json({ result: 'Example Domain HTML content...' });
-    } else {
-      res.json({ result: 'Webhook delivered successfully to ' + url });
-    }
-  } catch (e) {
-    res.json({ result: 'Error fetching URL' });
+  // Simple mocked response (no real outbound request)
+  if (url.includes('example.com')) {
+    return res.json({ result: 'Example Domain HTML content...' });
   }
+  return res.json({ result: 'Webhook delivered successfully to ' + url });
 });
 
 // Flag 9: Race Condition (TOCTOU)
